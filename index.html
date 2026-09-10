@@ -44,6 +44,15 @@
 .profileEditor{position:fixed;inset:8px;z-index:80;background:#0b1020;border:1px solid var(--line);border-radius:20px;padding:12px;overflow:auto;display:grid;align-content:start;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.55)}
 .profileEditorHead{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:-12px;background:#0b1020;padding:4px 0 8px;z-index:2}.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:var(--muted);font-weight:750}.field input,.field select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#0c1424;color:var(--text);padding:9px 11px;font-size:16px}.seg{display:grid;grid-template-columns:1fr 1fr;gap:7px}.seg button.active{border-color:var(--accent);background:#13291a}.ballList{display:grid;gap:8px}.ballRow{border:1px solid var(--line);border-radius:13px;padding:9px;background:#0c1424;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.ballMeta{font-size:11px;color:var(--muted);margin-top:3px}.ballRemove{min-height:38px!important;padding:7px 10px!important}.setupCard{display:grid;gap:12px}.profileSummary{border:1px solid var(--line);background:#0c1424;border-radius:13px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.profileSummaryMain{min-width:0}.profileSummaryMain strong{display:block}.profileSummaryMain span{display:block;font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.setupGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.setupGrid .field.full{grid-column:1/-1}.gameContext{font-size:10px;color:var(--muted);margin-top:2px}.menuProfileLine{font-size:11px;color:var(--muted);margin-top:2px}@media(max-width:520px){.profileEditor{inset:4px;padding:9px;border-radius:15px}.formGrid,.setupGrid{grid-template-columns:1fr 1fr}.field.full{grid-column:1/-1}}
 
+/* Keep every screen within the tablet layout, with no outer card frame. */
+:root{--app-width:760px}
+.app{width:100%;max-width:var(--app-width)}
+.app>section>.card{border:0;border-radius:0;background:transparent;box-shadow:none;padding-left:0;padding-right:0}
+.feedbackCard,.bottomSheet,.pathSheet{width:min(var(--app-width),100%)}
+.frameReviewSheet,.profileEditor{left:0;right:0;width:calc(100% - 16px);max-width:var(--app-width);margin-inline:auto;border:0;border-radius:0;box-shadow:none}
+@media(max-width:520px){
+  .frameReviewSheet,.profileEditor{left:0;right:0;width:calc(100% - 8px)}
+}
 </style>
 </head>
 <body>
