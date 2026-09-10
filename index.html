@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Bowling Notes</title>
+<style>
+:root{--bg:#0b1020;--panel:#111827;--panel2:#0f172a;--text:#f8fafc;--muted:#94a3b8;--line:#263247;--accent:#22c55e;--accent2:#16a34a;--danger:#ef4444;--pin:#e5e7eb;--pinSel:#22c55e}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b1020,#0d1326 32%,#0b1020);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}button,input{font:inherit}.app{max-width:760px;margin:auto;padding:16px 14px 32px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.brand{font-size:20px;font-weight:800}.sub{font-size:12px;color:var(--muted)}.card{background:rgba(17,24,39,.97);border:1px solid var(--line);border-radius:18px;padding:16px}.stack{display:grid;gap:14px}.hidden{display:none!important}.btn{border:1px solid var(--line);background:#111827;color:var(--text);border-radius:14px;padding:13px 16px;min-height:48px;font-weight:800;cursor:pointer}.btn.primary{background:var(--accent);border-color:transparent;color:#07130a}.btn.primary:active{background:var(--accent2)}.btn.ghost{background:#0c1424}.btn.danger{background:#2b1115;border-color:#5e1b24;color:#fecaca}.btn:disabled{opacity:.4;cursor:not-allowed}.hero{font-size:30px;font-weight:850;line-height:1.05}.scoreTop{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.scoreBig{font-size:42px;font-weight:900;line-height:1}.muted{color:var(--muted)}.mini{font-size:12px}.framegrid{display:grid;grid-template-columns:repeat(10,minmax(56px,1fr));gap:4px;overflow-x:auto;padding-bottom:2px}.frame{border:1px solid var(--line);background:#0c1424;color:var(--text);border-radius:10px;padding:6px;min-width:56px;text-align:center}.frame.has-data{cursor:pointer}.frame.has-data:active{border-color:#64748b}.frame.has-data:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.frame .n{font-size:10px;color:var(--muted)}.frame .rolls{font-size:13px;min-height:19px}.frame .cum{font-weight:800;min-height:19px}.lane{display:grid;gap:14px;justify-items:center;padding:8px 0 2px}.pinrow{display:flex;justify-content:center;gap:18px}.pin{width:52px;height:52px;border-radius:50%;border:2px solid #475569;background:#0c1424;color:#cbd5e1;font-weight:900;cursor:pointer;display:grid;place-items:center;transition:.12s}.pin.available{border-color:#64748b}.pin.selected{background:var(--pinSel);border-color:var(--pinSel);color:#07130a;transform:scale(1.05)}.pin.unavailable{opacity:.16;cursor:default}.guide{text-align:center}.guide strong{display:block;font-size:18px;margin-bottom:3px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions.one{grid-template-columns:1fr}.throwActions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch}.btn.special{min-width:108px;background:#172033;border-color:#334155;color:#e2e8f0;font-weight:800}.feedbackCard{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);max-height:64dvh;overflow:auto;z-index:50;border:1px solid var(--line);border-bottom:0;background:#0c1424;border-radius:20px 20px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -18px 45px rgba(0,0,0,.35)}.feedbackTitle{font-size:18px;font-weight:850}.feedbackChoices{display:grid;grid-template-columns:1fr 1fr;gap:8px}.choice{border:1px solid var(--line);background:#111827;color:var(--text);border-radius:12px;padding:11px 12px;min-height:44px;font-weight:700;text-align:left;cursor:pointer}.choice.active{border-color:#22c55e;background:#13291a}.suggestion{border:1px solid #365314;background:#14240d;color:#d9f99d;border-radius:14px;padding:12px;font-size:13px;line-height:1.45}.feedbackActions{display:flex;gap:8px;flex-wrap:wrap}.feedbackActions .btn{flex:1}.status{font-size:13px;color:var(--muted);text-align:center}.historyRow{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.historyRow:last-child{border-bottom:0}.right{text-align:right}.toast{padding:10px 12px;border-radius:12px;border:1px solid #365314;background:#14240d;color:#d9f99d;font-size:13px}.sheetBackdrop{position:fixed;inset:0;background:rgba(2,6,23,.38);z-index:40}.bottomSheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);max-height:72vh;overflow:auto;background:#111827;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));z-index:41;box-shadow:0 -18px 45px rgba(0,0,0,.35)}.sheetHandle{width:42px;height:4px;border-radius:999px;background:#475569;margin:0 auto 12px}.sheetHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sheetThrow{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.sheetAdvice{margin-top:8px;border:1px solid #365314;background:#14240d;color:#d9f99d;border-radius:12px;padding:10px 11px;font-size:13px;line-height:1.45}.sheetPins{font-size:12px;color:var(--muted);margin-top:4px}.sheetClose{min-height:40px;padding:8px 12px}.pathSheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);max-height:88dvh;overflow:auto;z-index:55;border:1px solid var(--line);border-bottom:0;background:#0c1424;border-radius:20px 20px 0 0;padding:12px 12px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -18px 45px rgba(0,0,0,.4)}.laneMapWrap{border:1px solid var(--line);background:#111827;border-radius:14px;padding:8px}.laneMap{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}.laneMap .board{stroke:#334155;stroke-width:.7}.laneMap .five{stroke:#64748b;stroke-width:1.2}.laneMap .zone{fill:transparent;cursor:pointer}.laneMap .zone:hover{fill:rgba(255,255,255,.025)}.laneMap .pathline{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.laneMap .recPathline{fill:none;stroke:#60a5fa;stroke-width:3;stroke-dasharray:7 6;stroke-linecap:round;stroke-linejoin:round;opacity:.82}.laneMap .pick{fill:var(--accent);stroke:#dcfce7;stroke-width:2;cursor:ew-resize;pointer-events:all}.laneMap.dragging .pick{cursor:grabbing}.laneMap .pickHalo{fill:rgba(34,197,94,.18)}.laneMap .arrowMark{fill:#94a3b8}.laneMap .mapLabel{fill:#cbd5e1;font-size:10px;font-weight:800}.laneMap .boardNum{fill:#94a3b8;font-size:8px}.mapLegend{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.mapChip{border:1px solid var(--line);border-radius:10px;padding:6px 4px;text-align:center;background:#111827}.mapChip .k{font-size:9px;color:var(--muted)}.mapChip .v{font-weight:900;font-size:14px}.recommendedBox{border:1px solid #27466f;background:#0d1b35;border-radius:13px;padding:9px;display:grid;gap:7px}.recommendedHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.recommendedTitle{font-size:11px;font-weight:900;color:#bfdbfe;text-transform:uppercase;letter-spacing:.06em}.recommendedTarget{font-size:10px;color:#93c5fd}.recChip{border:1px solid #27466f;background:#101d33;color:#dbeafe;border-radius:10px;padding:6px 4px;text-align:center;cursor:pointer;min-height:42px}.recChip:active{background:#16345d}.recChip .k{font-size:9px;color:#93c5fd}.recChip .v{font-weight:900;font-size:14px}.recHint{font-size:10px;color:#93c5fd;text-align:center}.useRecBtn{min-height:40px!important;padding:8px 10px!important;font-size:12px}.mapHint{font-size:11px;color:var(--muted);text-align:center}.pinDeckWrap{border:1px solid var(--line);background:#111827;border-radius:14px;padding:7px}.pinDeckMap{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}.deckPin{fill:#e2e8f0;stroke:#64748b;stroke-width:2}.deckPinNum{fill:#0f172a;font-size:12px;font-weight:900;text-anchor:middle;dominant-baseline:middle;pointer-events:none}.deckBall{fill:rgba(34,197,94,.34);stroke:var(--accent);stroke-width:3;pointer-events:none}.deckCross{stroke:#dcfce7;stroke-width:2;stroke-linecap:round;pointer-events:none}.deckStatus{font-size:12px;color:var(--muted);text-align:center;margin-top:5px;min-height:17px}.adviceNow{border:1px solid #365314;background:#14240d;color:#d9f99d;border-radius:12px;padding:10px;font-size:12px;line-height:1.4}.handPick{display:grid;grid-template-columns:1fr 1fr;gap:8px}.handPick button{min-height:44px}.handPick button.active{background:#13291a;border-color:var(--accent)}@media(max-width:520px){.hero{font-size:26px}.pin{width:48px;height:48px}.pinrow{gap:12px}.framegrid{grid-template-columns:repeat(10,58px)}.actions{grid-template-columns:1fr}.feedbackChoices{grid-template-columns:1fr}.scoreBig{font-size:38px}.btn.special{min-width:92px;padding-left:12px;padding-right:12px}}
+
+@media(max-width:520px){
+  body:has(#game:not(.hidden)){overflow:hidden}
+  .app:has(#game:not(.hidden)){height:100dvh;padding:8px 10px 10px;overflow:hidden}
+  .top{margin-bottom:7px;min-height:48px}.brand{font-size:18px}.top .sub{display:none}.top .btn{min-height:40px;padding:8px 12px}
+  #game:not(.hidden){height:calc(100dvh - 63px);display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:7px;overflow:hidden}
+  #game>.card{padding:9px;border-radius:14px}.stack{gap:8px}
+  .scoreTop{gap:8px}.hero{font-size:21px}.scoreBig{font-size:32px}.mini{font-size:11px}
+  .framegrid{grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;overflow:visible;padding:0}.frame{min-width:0;padding:3px 1px;border-radius:7px}.frame .n{font-size:9px}.frame .rolls{font-size:11px;min-height:15px}.frame .cum{font-size:11px;min-height:15px}
+  #game>.card:nth-of-type(2){min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto auto auto auto;gap:6px} #preShotTip{order:4;margin-top:2px}.guide{order:2}.lane{order:3}.mindTip{order:1}.status{order:5}.throwActions{order:6}.feedbackActions{order:7}.pathSheet{order:8}
+  .guide strong{font-size:16px;margin-bottom:0}.guide .mini{font-size:10px}.preShotTip{padding:7px 9px;gap:4px}.preShotTip .tipMain{font-size:13px}.preShotTip .tipAdjust{font-size:10px}
+  .lane{gap:7px;padding:2px 0;align-self:center}.pinrow{gap:9px}.pin{width:42px;height:42px;font-size:15px}
+  .status{font-size:11px;min-height:14px}.throwActions{gap:7px}.btn{min-height:42px;padding:9px 12px;border-radius:11px}.btn.special{min-width:78px;padding-left:9px;padding-right:9px}
+  #undoBtn{min-height:38px;padding:7px 10px;font-size:13px}#endBtn{min-height:38px;padding:7px 10px;font-size:13px}
+  .feedbackChoices{grid-template-columns:1fr 1fr}.choice{min-height:42px;padding:9px 10px}.feedbackTitle{font-size:17px}
+}
+
+.preShotTip{border:1px solid #1d4ed8;background:#0d1b35;border-radius:14px;padding:9px 11px;display:grid;gap:5px}.preShotTip .tipLabel{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#93c5fd;font-weight:900}.preShotTip .tipMain{font-size:14px;font-weight:850;line-height:1.25;color:#dbeafe}.preShotTip .tipMeta{font-size:10.5px;color:#94a3b8;line-height:1.3}.preShotTip .tipLine{display:flex;gap:5px;flex-wrap:wrap}.preShotTip .tipChip{border:1px solid #27466f;background:#101d33;border-radius:999px;padding:3px 7px;font-size:10px;color:#dbeafe;font-weight:750}.preShotTip .tipAdjust{border-top:1px solid #27466f;padding-top:5px;font-size:10.5px;line-height:1.3;color:#bfdbfe}.preShotTip .tipAdjust strong{color:#dbeafe}
+
+.profileBtn{border:1px solid var(--line);background:#0c1424;border-radius:999px;padding:3px;min-width:46px;min-height:46px;display:grid;place-items:center}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#334155;color:#f8fafc;font-weight:900}.avatar.big{width:48px;height:48px}.profileMenu{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(420px,100%);z-index:70;background:#111827;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom));display:grid;gap:10px}.profileHead{display:flex;gap:10px;align-items:center;margin-bottom:4px}.mindTip{text-align:center;font-weight:800;color:#dbeafe;min-height:20px;opacity:1;transition:opacity .45s ease;font-size:13px}.mindTip.fade{opacity:.15}
+
+/* Full frame trajectory review */
+.frameReviewSheet{position:fixed;inset:8px;z-index:61;background:#0b1020;border:1px solid var(--line);border-radius:20px;padding:10px;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.frameReviewHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 8px}
+.frameReviewBody{min-height:0;display:grid;grid-template-columns:minmax(0,5fr) minmax(104px,1fr);gap:6px}
+.reviewLanePanel{min-width:0;min-height:0;border:1px solid var(--line);border-radius:14px;background:#0c1424;padding:1px;display:grid;place-items:center;overflow:hidden}
+.reviewLaneSvg{width:100%;height:100%;display:block;max-height:100%}
+.reviewTips{min-width:0;overflow:auto;border:1px solid var(--line);border-radius:14px;background:#111827;padding:8px;display:grid;align-content:start;gap:8px}
+.reviewThrowTabs{display:grid;grid-template-columns:1fr;gap:5px}.reviewThrowTab{min-height:34px;border:1px solid var(--line);border-radius:9px;background:#0c1424;color:var(--text);font-weight:800;font-size:11px;padding:5px}.reviewThrowTab.active{border-color:var(--accent);background:#13291a}
+.reviewBlock{border-top:1px solid var(--line);padding-top:7px;font-size:10px;line-height:1.35}.reviewBlock:first-of-type{border-top:0;padding-top:0}.reviewBlock strong{display:block;color:#f8fafc;font-size:10px;margin-bottom:3px}.reviewAdvice{color:#d9f99d}.reviewData{color:var(--muted)}
+.reviewLaneLegend{font-size:9px;fill:#94a3b8;font-weight:700}.reviewLaneBoard{stroke:#334155;stroke-width:.65}.reviewLaneFive{stroke:#64748b;stroke-width:1}.reviewLaneArrow{fill:#94a3b8}.reviewActualPath{fill:none;stroke:#22c55e;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;path-length:1;stroke-dasharray:1;stroke-dashoffset:1;animation:reviewDrawPath 1.45s cubic-bezier(.2,.75,.25,1) forwards}.reviewRecommendedPath{fill:none;stroke:#60a5fa;stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round;stroke-linejoin:round;opacity:.72}@keyframes reviewDrawPath{to{stroke-dashoffset:0}}@media(prefers-reduced-motion:reduce){.reviewActualPath{animation:none;stroke-dashoffset:0}}.reviewGuide{fill:none;stroke:#64748b;stroke-width:2;stroke-dasharray:5 5}.reviewPoint{fill:#22c55e;stroke:#dcfce7;stroke-width:2}.reviewPin{fill:#e2e8f0;stroke:#64748b;stroke-width:1}.reviewPinHit{fill:#22c55e;opacity:.28;stroke:#22c55e;stroke-width:2}.reviewLaneSvg.editing{touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}.reviewLaneSvg.editing .reviewActualPath{animation:none;stroke-dashoffset:0}.reviewLaneSvg.editing .reviewPoint{cursor:ew-resize}.editorHint{font-size:9px;color:#93c5fd;line-height:1.35}.editorSave{margin-top:4px}.editorUse{min-height:34px!important;padding:6px 8px!important;font-size:10px}.editorActual{color:#d9f99d}
+@media(max-width:520px){.frameReviewSheet{inset:4px;border-radius:15px;padding:6px}.frameReviewHead{padding-bottom:5px}.frameReviewHead .hero{font-size:18px!important}.frameReviewBody{grid-template-columns:minmax(0,5fr) minmax(96px,1fr);gap:4px}.reviewTips{padding:6px;gap:6px}.reviewBlock{font-size:9px}.reviewThrowTab{font-size:10px;min-height:31px;padding:4px}.reviewLanePanel{padding:2px}}
+
+.profileEditor{position:fixed;inset:8px;z-index:80;background:#0b1020;border:1px solid var(--line);border-radius:20px;padding:12px;overflow:auto;display:grid;align-content:start;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.profileEditorHead{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:-12px;background:#0b1020;padding:4px 0 8px;z-index:2}.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:var(--muted);font-weight:750}.field input,.field select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#0c1424;color:var(--text);padding:9px 11px;font-size:16px}.seg{display:grid;grid-template-columns:1fr 1fr;gap:7px}.seg button.active{border-color:var(--accent);background:#13291a}.ballList{display:grid;gap:8px}.ballRow{border:1px solid var(--line);border-radius:13px;padding:9px;background:#0c1424;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.ballMeta{font-size:11px;color:var(--muted);margin-top:3px}.ballRemove{min-height:38px!important;padding:7px 10px!important}.setupCard{display:grid;gap:12px}.profileSummary{border:1px solid var(--line);background:#0c1424;border-radius:13px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.profileSummaryMain{min-width:0}.profileSummaryMain strong{display:block}.profileSummaryMain span{display:block;font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.setupGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.setupGrid .field.full{grid-column:1/-1}.gameContext{font-size:10px;color:var(--muted);margin-top:2px}.menuProfileLine{font-size:11px;color:var(--muted);margin-top:2px}@media(max-width:520px){.profileEditor{inset:4px;padding:9px;border-radius:15px}.formGrid,.setupGrid{grid-template-columns:1fr 1fr}.field.full{grid-column:1/-1}}
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="top">
+    <div><div class="brand">Bowling Notes</div><div class="sub">Score, pin leaves + quick shot flags.</div></div>
+    <button class="profileBtn" id="profileBtn" type="button" aria-label="Open profile menu"><div class="avatar">K</div></button>
+  </div>
+  <div id="profileMenuBackdrop" class="sheetBackdrop hidden"></div>
+  <div id="profileMenu" class="profileMenu hidden">
+    <div class="sheetHandle"></div>
+    <div class="profileHead"><div class="avatar big" id="menuAvatar">K</div><div><strong id="menuProfileName">Bowling profile</strong><div class="menuProfileLine" id="menuProfileSummary">Set up your bowling profile</div></div></div>
+    <button class="btn ghost" id="editProfileBtn">Edit profile & ball bag</button>
+    <button class="btn ghost" id="historyBtn">History</button>
+    <button class="btn danger" id="endBtn">End game</button>
+    <button class="btn ghost" id="closeProfileBtn">Close</button>
+  </div>
+
+  <div id="profileEditor" class="profileEditor hidden" role="dialog" aria-modal="true" aria-labelledby="profileEditorTitle">
+    <div class="profileEditorHead"><div><div class="mini muted">Bowling profile</div><div class="hero" style="font-size:24px" id="profileEditorTitle">Your setup</div></div><button class="btn ghost mini" id="cancelProfileBtn">Close</button></div>
+    <div class="card stack">
+      <div class="formGrid">
+        <div class="field full"><label for="profileName">Name / nickname</label><input id="profileName" placeholder="e.g. Kai" maxlength="30"></div>
+        <div class="field"><label>Handedness</label><div class="seg"><button type="button" class="btn ghost" id="profileRight">Right</button><button type="button" class="btn ghost" id="profileLeft">Left</button></div></div>
+        <div class="field"><label>Delivery</label><div class="seg"><button type="button" class="btn ghost" id="profileOneHand">1 hand</button><button type="button" class="btn ghost" id="profileTwoHand">2 hand</button></div></div>
+        <div class="field"><label for="profileLevel">Experience</label><select id="profileLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+        <div class="field"><label for="profileUnits">Speed units</label><select id="profileUnits"><option value="kmh">km/h</option><option value="mph">mph</option></select></div>
+      </div>
+    </div>
+    <div class="card stack">
+      <div><div class="feedbackTitle">Ball Bag</div><div class="mini muted" style="margin-top:3px">Saved balls can be selected when starting a game.</div></div>
+      <div class="ballList" id="ballList"></div>
+      <button type="button" class="btn ghost" id="addBallBtn">+ Add ball</button>
+    </div>
+    <button type="button" class="btn primary" id="saveProfileBtn">Save profile</button>
+  </div>
+
+  <section id="home" class="stack">
+    <div class="card setupCard">
+      <div><div class="hero">Ready to bowl?</div><div class="muted" style="margin-top:7px">Set today's lane, choose your ball, then start the game.</div></div>
+      <button type="button" class="profileSummary" id="homeProfileSummary"><div class="profileSummaryMain"><strong id="homeProfileName">Set up profile</strong><span id="homeProfileMeta">Handedness, style and ball bag</span></div><span>›</span></button>
+      <div class="setupGrid">
+        <div class="field full"><label for="setupBall">Starting ball</label><select id="setupBall"></select></div>
+        <div class="field"><label for="setupCondition">Lane condition</label><select id="setupCondition"><option value="unknown">Unknown</option><option value="dry">Dry</option><option value="medium">Medium</option><option value="oily">Oily</option></select></div>
+        <div class="field"><label for="setupPattern">Oil pattern</label><select id="setupPattern"><option value="unknown">Unknown</option><option value="house">House shot</option><option value="sport">Sport / Challenge</option><option value="custom">Known / Custom</option></select></div>
+        <div class="field"><label for="setupVenue">Venue <span class="muted">optional</span></label><input id="setupVenue" placeholder="Bowling centre"></div>
+        <div class="field"><label for="setupLane">Lane <span class="muted">optional</span></label><input id="setupLane" inputmode="numeric" placeholder="e.g. 12"></div>
+      </div>
+      <button class="btn primary" id="startBtn">Start game</button>
+    </div>
+  </section>
+
+  <section id="game" class="stack hidden">
+    <div class="card stack">
+      <div class="scoreTop">
+        <div><div class="mini muted">Frame <span id="frameNo">1</span> · Throw <span id="throwNo">1</span></div><div class="hero" id="turnLabel">First ball</div><div class="gameContext" id="gameContext"></div></div>
+        <div class="right"><div class="mini muted">Score</div><div class="scoreBig" id="scoreNow">0</div></div>
+      </div>
+      <div class="framegrid" id="frameGrid"></div>
+    </div>
+
+    <div class="card stack">
+      <div class="preShotTip" id="preShotTip" aria-live="polite">
+        <div class="tipLabel" id="preShotLabel">Pre-shot tip</div>
+        <div class="tipMain" id="preShotMain">Building your starting line…</div>
+        <div class="tipLine" id="preShotLine"></div>
+        <div class="tipMeta" id="preShotMeta"></div>
+        <div class="tipAdjust hidden" id="preShotAdjust"></div>
+      </div>
+      <div class="mindTip" id="mindTip">Control your breathing. Smooth tempo.</div>
+        <div class="guide"><strong id="pinPrompt">Tap the pins still standing</strong><span class="muted mini" id="pinHint">Then press Record throw.</span></div>
+      <div class="lane" aria-label="Bowling pin layout">
+        <div class="pinrow"><button class="pin" data-pin="7">7</button><button class="pin" data-pin="8">8</button><button class="pin" data-pin="9">9</button><button class="pin" data-pin="10">10</button></div>
+        <div class="pinrow"><button class="pin" data-pin="4">4</button><button class="pin" data-pin="5">5</button><button class="pin" data-pin="6">6</button></div>
+        <div class="pinrow"><button class="pin" data-pin="2">2</button><button class="pin" data-pin="3">3</button></div>
+        <div class="pinrow"><button class="pin" data-pin="1">1</button></div>
+      </div>
+      <div class="status" id="selectionStatus">No pins selected yet.</div>
+      <div class="throwActions" id="quickActions">
+        <button class="btn primary" id="recordBtn">Record throw</button>
+        <button class="btn special" id="strikeBtn">Strike</button>
+        <button class="btn special hidden" id="spareBtn">Spare</button>
+      </div>
+      <div class="feedbackActions"><button class="btn ghost" id="undoBtn" disabled>Undo last throw</button><button class="btn ghost hidden" id="feltWrongBtn">Felt wrong</button></div>
+      <div class="pathSheet hidden stack" id="pathSheet">
+        <div><div class="feedbackTitle">Map this throw</div><div class="muted mini" style="margin-top:4px">Board 1 is the far-right board as you face the pins; numbers increase to the left up to board 39.</div></div>
+        <div class="laneMapWrap">
+          <svg id="laneMap" class="laneMap" viewBox="0 0 420 390" role="img" aria-label="Bowling lane board map. Tap or drag feet, release, arrow and breakpoint points to map the ball path.">
+            <rect x="18" y="18" width="384" height="344" rx="8" fill="#c89b5d" opacity=".16"></rect>
+            <g id="boardLines"></g>
+            <g id="arrowMarks"></g>
+            <g id="recommendedLineLayer"></g>
+            <text class="mapLabel" x="22" y="34">PINS / BREAKPOINT</text>
+            <text class="mapLabel" x="22" y="170">ARROWS</text>
+            <text class="mapLabel" x="22" y="268">RELEASE</text>
+            <text class="mapLabel" x="22" y="340">FEET</text>
+            <g id="pathLineLayer"></g>
+            <rect class="zone" data-stage="breakpoint" x="18" y="18" width="384" height="112"></rect>
+            <rect class="zone" data-stage="arrow" x="18" y="130" width="384" height="96"></rect>
+            <rect class="zone" data-stage="release" x="18" y="226" width="384" height="72"></rect>
+            <rect class="zone" data-stage="feet" x="18" y="298" width="384" height="64"></rect>
+            <g id="boardNumbers"></g>
+          </svg>
+          <div class="mapHint">Tap a row or drag its green point left/right. It snaps to half-boards and updates live.</div>
+        </div>
+        <div class="mapLegend">
+          <div class="mapChip"><div class="k">ACTUAL FEET</div><div class="v" id="pvFeet">25</div></div>
+          <div class="mapChip"><div class="k">ACTUAL RELEASE</div><div class="v" id="pvRelease">18</div></div>
+          <div class="mapChip"><div class="k">ACTUAL ARROW</div><div class="v" id="pvArrow">10</div></div>
+          <div class="mapChip"><div class="k">ACTUAL BREAK</div><div class="v" id="pvBreak">7</div></div>
+        </div>
+        <div class="recommendedBox" id="recommendedMapBox">
+          <div class="recommendedHead"><div class="recommendedTitle">Recommended for this throw</div><div class="recommendedTarget" id="recTarget">Target 1–3 pocket</div></div>
+          <div class="mapLegend">
+            <button type="button" class="recChip" data-copy-rec="feet"><div class="k">FEET</div><div class="v" id="recFeet">—</div></button>
+            <button type="button" class="recChip" data-copy-rec="release"><div class="k">RELEASE</div><div class="v" id="recRelease">—</div></button>
+            <button type="button" class="recChip" data-copy-rec="arrow"><div class="k">ARROW</div><div class="v" id="recArrow">—</div></button>
+            <button type="button" class="recChip" data-copy-rec="breakpoint"><div class="k">BREAK</div><div class="v" id="recBreak">—</div></button>
+          </div>
+          <div class="recHint">Tap one box to copy that value, or copy the whole recommended line.</div>
+          <button type="button" class="btn ghost useRecBtn" id="useRecommendedBtn">Use recommended line</button>
+        </div>
+        <div><div class="mini muted" style="margin-bottom:6px">Where did the ball enter the pin deck? <span id="recommendedDeckTarget" style="color:#93c5fd"></span></div>
+          <div class="pinDeckWrap">
+            <svg id="pinDeckMap" class="pinDeckMap" viewBox="0 0 360 195" role="img" aria-label="Bowling pin deck. Tap or drag to mark where the ball entered, including a miss left or right.">
+              <rect x="6" y="6" width="348" height="183" rx="12" fill="#0c1424" stroke="#263247"/>
+              <g id="deckPins"></g>
+              <g id="deckHitLayer"></g>
+            </svg>
+            <div class="deckStatus" id="deckStatus">Tap the pin deck where the ball travelled — you can also tap beside the pins for a miss.</div>
+          </div>
+        </div>
+        <button class="btn primary" id="savePathBtn">Save throw path</button>
+      </div>
+      <div class="feedbackCard hidden stack" id="feedbackCard">
+        <div class="stack" id="feedbackCategory">
+          <div><div class="feedbackTitle">What felt wrong?</div><div class="muted mini" style="margin-top:4px">Choose the closest match.</div></div>
+          <div class="feedbackChoices" id="categoryChoices">
+            <button class="choice" data-cat="ball">Ball reaction</button>
+            <button class="choice" data-cat="release">Release / accuracy</button>
+            <button class="choice" data-cat="speed">Speed / timing</button>
+            <button class="choice" data-cat="carry">Pocket / carry</button>
+          </div>
+        </div>
+        <div class="hidden stack" id="feedbackDetail">
+          <div><div class="feedbackTitle" id="detailTitle">What happened?</div><div class="muted mini" id="detailHint" style="margin-top:4px"></div></div>
+          <div class="feedbackChoices" id="detailChoices"></div>
+          <button class="btn ghost" id="backFeedbackBtn">Back</button>
+        </div>
+        <div class="hidden stack" id="feedbackSuggestion">
+          <div><div class="feedbackTitle">For the next shot</div><div class="muted mini" style="margin-top:4px">A simple reminder based on what you flagged.</div></div>
+          <div class="suggestion" id="suggestionText"></div>
+          <button class="btn primary" id="continueBtn">Got it — continue</button>
+        </div>
+      </div>
+    </div>
+
+    
+  </section>
+
+  <section id="summary" class="stack hidden">
+    <div class="card stack">
+      <div><div class="mini muted">Game complete</div><div class="hero">Final score: <span id="finalScore">0</span></div></div>
+      <div class="framegrid" id="summaryGrid"></div>
+      <div class="toast">Saved on this device.</div>
+      <button class="btn primary" id="newGameBtn">Start another game</button>
+    </div>
+  </section>
+
+  <div class="sheetBackdrop hidden" id="frameSheetBackdrop" aria-hidden="true"></div>
+  <aside class="frameReviewSheet hidden" id="frameSheet" role="dialog" aria-modal="true" aria-labelledby="frameSheetTitle">
+    <div class="frameReviewHead">
+      <div><div class="mini muted">Frame review</div><div class="hero" style="font-size:22px" id="frameSheetTitle">Frame</div></div>
+      <button class="btn ghost mini sheetClose" id="closeFrameSheetBtn">Close</button>
+    </div>
+    <div class="frameReviewBody">
+      <div class="reviewLanePanel" id="reviewLaneHost"></div>
+      <aside class="reviewTips" id="reviewTips"></aside>
+    </div>
+  </aside>
+
+  <section id="history" class="stack hidden">
+    <div class="card stack">
+      <div class="scoreTop"><div class="hero">History</div><button class="btn ghost mini" id="closeHistoryBtn">Close</button></div>
+      <div id="historyList" class="muted">No games yet.</div>
+    </div>
+  </section>
+</div>
+<script>
+(()=>{
+const ALL=[1,2,3,4,5,6,7,8,9,10], STORAGE='bowlingNotesGamesV1', PROFILE_STORAGE='bowlingNotesProfileV1';
+const $=id=>document.getElementById(id), sections=['home','game','summary','history'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+let returnScreen='home';
+let profile=loadProfile();
+let profileDraft=null;
+let S=fresh();
+function defaultProfile(){return{name:'',hand:'right',style:'one',level:'intermediate',units:'kmh',balls:[]}}
+function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_STORAGE)||'null');return p&&typeof p==='object'?{...defaultProfile(),...p,balls:Array.isArray(p.balls)?p.balls:[]}:defaultProfile()}catch{return defaultProfile()}}
+function saveProfileData(){localStorage.setItem(PROFILE_STORAGE,JSON.stringify(profile))}
+function fresh(){return{startedAt:new Date().toISOString(),hand:profile.hand||'right',context:{ballId:'',ballName:'',condition:'unknown',pattern:'unknown',venue:'',lane:''},frames:Array.from({length:10},()=>({rolls:[],leaves:[],feedback:[],paths:[],advice:[]})),frame:1,rack:[...ALL],selected:[],complete:false,pendingFeedback:null,flags:[],lastSuggestion:'',pendingPath:null,lastThrowRef:null}}
+function profileInitial(){return (profile.name||'K').trim().charAt(0).toUpperCase()||'K'}
+function ballLabel(b){return [b.name,b.weight?b.weight+' lb':'',b.type||'',b.label||''].filter(Boolean).join(' · ')}
+function renderProfileSummary(){
+  const meta=[profile.hand==='left'?'Left-handed':'Right-handed',profile.style==='two'?'Two-handed':'One-handed',profile.level.charAt(0).toUpperCase()+profile.level.slice(1),profile.balls.length+' ball'+(profile.balls.length===1?'':'s')];
+  $('homeProfileName').textContent=profile.name||'Set up profile';$('homeProfileMeta').textContent=meta.join(' · ');
+  $('menuProfileName').textContent=profile.name||'Bowling profile';$('menuProfileSummary').textContent=meta.join(' · ');
+  document.querySelectorAll('.avatar').forEach(a=>a.textContent=profileInitial());
+  const sel=$('setupBall'),prev=sel.value;sel.innerHTML=profile.balls.length?profile.balls.map(b=>`<option value="${esc(b.id)}">${esc(b.name||'Unnamed ball')}</option>`).join(''):'<option value="">No balls saved — add one in Profile</option>';
+  if(profile.balls.some(b=>b.id===prev))sel.value=prev;
+}
+function renderBallList(){
+  const list=$('ballList');
+  list.innerHTML=profileDraft.balls.length?profileDraft.balls.map((b,i)=>`<div class="ballRow"><div><strong>${esc(b.name||'Unnamed ball')}</strong><div class="ballMeta">${esc(ballLabel(b)||'Add details')}</div></div><button type="button" class="btn ghost ballRemove" data-edit-ball="${i}">Edit</button></div>`).join(''):'<div class="mini muted">No balls yet. Add the balls you actually use.</div>';
+  list.querySelectorAll('[data-edit-ball]').forEach(btn=>btn.onclick=()=>editBall(+btn.dataset.editBall));
+}
+function setProfileSeg(){
+  $('profileRight').classList.toggle('active',profileDraft.hand==='right');$('profileLeft').classList.toggle('active',profileDraft.hand==='left');
+  $('profileOneHand').classList.toggle('active',profileDraft.style==='one');$('profileTwoHand').classList.toggle('active',profileDraft.style==='two');
+}
+function openProfileEditor(){
+  closeProfile();profileDraft=JSON.parse(JSON.stringify(profile));$('profileName').value=profileDraft.name||'';$('profileLevel').value=profileDraft.level;$('profileUnits').value=profileDraft.units;setProfileSeg();renderBallList();$('profileEditor').classList.remove('hidden');
+}
+function closeProfileEditor(){$('profileEditor').classList.add('hidden');profileDraft=null}
+function editBall(index){
+  const existing=index>=0?profileDraft.balls[index]:{id:'b'+Date.now(),name:'',weight:'',type:'Reactive',label:''};
+  const name=prompt('Ball name',existing.name||'');if(name===null)return;const weight=prompt('Weight in lb (optional)',existing.weight||'');if(weight===null)return;const type=prompt('Type: Reactive, Urethane, Plastic or Other',existing.type||'Reactive');if(type===null)return;const label=prompt('Personal label (optional, e.g. Benchmark / Spare)',existing.label||'');if(label===null)return;
+  const ball={...existing,name:name.trim()||'Unnamed ball',weight:String(weight).trim(),type:type.trim()||'Other',label:label.trim()};if(index>=0)profileDraft.balls[index]=ball;else profileDraft.balls.push(ball);renderBallList();
+}
+function currentBall(){return profile.balls.find(b=>b.id===S.context?.ballId)||null}
+function show(id){sections.forEach(x=>$(x).classList.toggle('hidden',x!==id))}
+function currentFrame(){return S.frames[S.frame-1]}
+function isFreshRack(){return S.rack.length===10}
+function selectedSet(){return new Set(S.selected)}
+function mark(p){return p===10?'X':String(p)}
+function frameMarks(arr,f){if(!arr.length)return'';if(f<10){if(arr[0]===10)return'X';if(arr.length===1)return mark(arr[0]);return `${mark(arr[0])} ${arr[0]+arr[1]===10?'/':mark(arr[1])}`;}return arr.map((p,i)=>{if(p===10)return'X';if(i===1&&arr[0]!==10&&arr[0]+p===10)return'/';if(i===2){if(arr[0]===10&&arr[1]!==10&&arr[1]+p===10)return'/';if(arr[0]!==10&&arr[0]+arr[1]===10&&p===10)return'X'}return mark(p)}).join(' ')}
+function flatFutureRolls(fromFrame){const out=[];for(let f=fromFrame;f<10;f++)out.push(...S.frames[f].rolls);return out}
+function scoreGame(){let total=0;const cum=[];for(let i=0;i<10;i++){const r=S.frames[i].rolls;if(!r.length){cum.push(null);continue}if(i<9){if(r[0]===10){const n=flatFutureRolls(i+1).slice(0,2);if(n.length<2){cum.push(null);continue}total+=10+n[0]+n[1]}else{if(r.length<2){cum.push(null);continue}if(r[0]+r[1]===10){const n=flatFutureRolls(i+1).slice(0,1);if(n.length<1){cum.push(null);continue}total+=10+n[0]}else total+=r[0]+r[1]}}else{if(r.length<2){cum.push(null);continue}const need3=r[0]===10||r[0]+r[1]===10;if(need3&&r.length<3){cum.push(null);continue}total+=r.reduce((a,b)=>a+b,0)}cum.push(total)}return{total,cum}}
+function renderFrames(target){const sc=scoreGame();target.innerHTML=S.frames.map((f,i)=>{const has=f.rolls.length>0;return `<button type="button" class="frame${has?' has-data':''}" data-frame-review="${i+1}" ${has?'':'disabled'} aria-label="${has?'Review frame '+(i+1):'Frame '+(i+1)+' not yet played'}"><div class="n">${i+1}</div><div class="rolls">${frameMarks(f.rolls,i+1)}</div><div class="cum">${sc.cum[i]??''}</div></button>`}).join('');target.querySelectorAll('[data-frame-review]').forEach(b=>{if(b.disabled)return;b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openFrameSheet(Number(b.dataset.frameReview))});b.addEventListener('pointerup',e=>{if(e.pointerType==='touch'){e.preventDefault();e.stopPropagation();openFrameSheet(Number(b.dataset.frameReview))}})});return sc}
+function renderPins(){const avail=new Set(S.rack),sel=selectedSet();document.querySelectorAll('.pin').forEach(b=>{const p=+b.dataset.pin;b.classList.toggle('unavailable',!avail.has(p));b.classList.toggle('available',avail.has(p));b.classList.toggle('selected',avail.has(p)&&sel.has(p));b.disabled=!avail.has(p)});const count=S.selected.length;$('selectionStatus').textContent=count?`${count} pin${count===1?'':'s'} selected as still standing: ${S.selected.slice().sort((a,b)=>a-b).join(', ')}`:'No pins selected yet.'}
+function rollNumber(){return currentFrame().rolls.length+1}
+function quickButtons(){const rn=rollNumber(),fresh=isFreshRack();$('strikeBtn').classList.toggle('hidden',!fresh);$('spareBtn').classList.toggle('hidden',fresh);$('turnLabel').textContent=fresh?'Fresh rack':rn===2?'Second ball':'Bonus ball';$('pinPrompt').textContent='Tap the pins still standing';$('pinHint').textContent=fresh?'Or tap Strike.':'Or tap Spare if you cleared them.'}
+function avg(vals){const a=vals.filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function roundHalf(v){return v==null?null:Math.round(v*2)/2}
+function successfulStrikePaths(){
+  const out=[];
+  // Current game first, then saved games for the same hand. This lets frame 1
+  // use genuine prior strike data instead of an invented generic line.
+  S.frames.forEach(f=>{if(f.rolls&&f.rolls[0]===10&&f.paths&&f.paths[0])out.push(f.paths[0])});
+  try{
+    const saved=getSaved();
+    for(const g of saved){
+      if(g===S||!g||g.hand!==S.hand||!Array.isArray(g.frames))continue;
+      g.frames.forEach(f=>{if(f?.rolls?.[0]===10&&f?.paths?.[0])out.unshift(f.paths[0])});
+    }
+  }catch{}
+  return out;
+}
+function strikeSetup(){
+  const strikes=successfulStrikePaths();
+  if(strikes.length){
+    const recent=strikes.slice(-4);
+    return{feet:roundHalf(avg(recent.map(p=>p.feet))),release:roundHalf(avg(recent.map(p=>p.release))),arrow:roundHalf(avg(recent.map(p=>p.arrow))),breakpoint:roundHalf(avg(recent.map(p=>p.breakpoint))),entry:S.hand==='left'?'1-2':'1-3',source:recent.length===1?'your last strike':'your recent strikes',learned:true};
+  }
+  // No fabricated strike geometry. Until the bowler has logged a strike, the
+  // app asks for their normal strike shot and learns from the mapped result.
+  return null;
+}
+function sameLeave(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i])}
+function successfulSparePath(leave){let best=null;S.frames.forEach(f=>{for(let i=1;i<(f.rolls||[]).length;i++){const before=i===1?(f.leaves?.[0]||[]):(f.leaves?.[i-1]||[]);const after=f.leaves?.[i]||[];if(sameLeave([...before].sort((a,b)=>a-b),leave)&&after.length===0&&f.paths?.[i])best=f.paths[i]}});return best}
+function genericSpareSetup(leave){const L=[...leave].sort((a,b)=>a-b);const rightPins=L.filter(p=>[3,6,9,10].includes(p)).length,leftPins=L.filter(p=>[2,4,7,8].includes(p)).length,center=L.filter(p=>[1,5].includes(p)).length;let side='center';if(rightPins>leftPins+center)side='right';else if(leftPins>rightPins+center)side='left';if(side==='right')return{feet:S.hand==='left'?34:35,release:S.hand==='left'?29:30,arrow:20,breakpoint:6,entry:'right side',source:'generic spare line'};if(side==='left')return{feet:S.hand==='left'?5:6,release:S.hand==='left'?10:11,arrow:20,breakpoint:34,entry:'left side',source:'generic spare line'};return{feet:20,release:S.hand==='left'?21:19,arrow:20,breakpoint:20,entry:'center',source:'generic spare line'}}
+function spareSetup(leave){const prior=successfulSparePath(leave);if(prior)return{feet:prior.feet,release:prior.release,arrow:prior.arrow,breakpoint:prior.breakpoint,entry:prior.deckLabel||prior.entry||'same entry',source:'your successful attempt on this leave'};return genericSpareSetup(leave)}
+function setupForRack(rack){const r=[...rack].sort((a,b)=>a-b);return r.length===10?strikeSetup():spareSetup(r)}
+function fmtLeave(leave){if(!leave.length)return'no pins';return leave.length===1?`${leave[0]} pin`:`pins ${leave.join('-')}`}
+function latestFirstBallAdvice(){for(let fi=Math.min(S.frame-1,9);fi>=0;fi--){const f=S.frames[fi];if(f&&f.advice&&f.advice[0])return f.advice[0]}return''}
+function compactAdvice(text){if(!text)return'';return text.replace(/ Your last strike used.*$/,'').replace(/^Strike line found:/,'Strike:').trim()}
+function renderPreShotTip(){
+  if(S.complete)return;
+  const fresh=isFreshRack();let setup,label,main,meta,adjust='';
+  if(fresh){
+    setup=strikeSetup();label='Strike plan';
+    if(setup){
+      main=`Target the ${setup.entry} pocket.`;meta=`Line from ${setup.source}.`;
+    }else{
+      main=`Bowl your normal strike shot to the ${S.hand==='left'?'1-2':'1-3'} pocket.`;
+      meta='No successful strike line is stored yet. Map this throw and the app will learn your strike shape.';
+    }
+    const last=latestFirstBallAdvice();if(last&&S.frame>1)adjust=compactAdvice(last);
+  }else{
+    const leave=[...S.rack].sort((a,b)=>a-b);setup=spareSetup(leave);label=`Spare plan · ${fmtLeave(leave)}`;main=`Use a controlled line toward the ${setup.entry}.`;meta=setup.source==='your successful attempt on this leave'?'Use your successful line for this leave.':'Baseline line until you log a successful conversion.';
+  }
+  const chips=setup?[['Feet',setup.feet],['Release',setup.release],['Arrow',setup.arrow],['Break',setup.breakpoint]].map(([k,v])=>`<span class="tipChip">${k} ${fmtBoard(v)}</span>`).join(''):'';
+  $('preShotLabel').textContent=label;$('preShotMain').textContent=main;$('preShotLine').innerHTML=chips;$('preShotMeta').textContent=meta;const el=$('preShotAdjust');el.classList.toggle('hidden',!adjust);el.innerHTML=adjust?`<strong>Last-ball adjustment:</strong> ${esc(adjust)}`:'';
+}
+function renderGame(){if(S.complete&&!S.pendingFeedback){finish();return}const sc=renderFrames($('frameGrid'));$('scoreNow').textContent=sc.total;$('frameNo').textContent=S.frame;$('throwNo').textContent=rollNumber();$('undoBtn').disabled=!S.frames.some(f=>f.rolls.length);$('feltWrongBtn').classList.toggle('hidden',!S.lastThrowRef||!!S.pendingPath);renderPins();quickButtons();renderPreShotTip();const ctx=S.context||{};$('gameContext').textContent=[ctx.ballName,ctx.venue,ctx.lane?'Lane '+ctx.lane:'',ctx.condition&&ctx.condition!=='unknown'?ctx.condition+' oil':''].filter(Boolean).join(' · ')}
+function recordWithLeave(leave){if(S.pendingFeedback||S.pendingPath)return;const frameBefore=S.frame,rollBefore=rollNumber(),rackBefore=[...S.rack],recommended=setupForRack(rackBefore);const leaveSet=new Set(leave);if([...leaveSet].some(p=>!rackBefore.includes(p)))return;const knocked=rackBefore.length-leave.length;const f=currentFrame();f.rolls.push(knocked);f.leaves.push([...leave].sort((a,b)=>a-b));f.feedback.push(null);if(!f.paths)f.paths=[];if(!f.advice)f.advice=[];f.paths.push(null);f.advice.push('');advanceAfterRoll(knocked,leave,rackBefore);S.selected=[];S.pendingFeedback={frame:frameBefore,roll:rollBefore,knocked,leave:[...leave]};S.pendingPath={frame:frameBefore,roll:rollBefore,rackBefore,recommended:recommended?{...recommended}:null};renderGame();openThrowEditor(frameBefore,rollBefore-1)}
+function advanceAfterRoll(knocked,leave,rackBefore){const f=currentFrame(),r=f.rolls,rn=r.length;if(S.frame<10){if(rn===1&&knocked===10){S.frame++;S.rack=[...ALL]}else if(rn===1){S.rack=[...leave]}else{S.frame++;S.rack=[...ALL]};return}
+// 10th frame
+if(rn===1){S.rack=knocked===10?[...ALL]:[...leave];return}
+if(rn===2){const first=r[0],second=r[1];if(first<10){if(first+second===10){S.rack=[...ALL]}else{S.complete=true}}else{S.rack=second===10?[...ALL]:[...leave]}return}
+if(rn>=3)S.complete=true}
+function strike(){if(!isFreshRack())return;recordWithLeave([])}
+function spare(){if(isFreshRack())return;recordWithLeave([])}
+function snapshotBeforeLast(){S.pendingFeedback=null;S.lastThrowRef=null;closeFeedback();for(let fi=9;fi>=0;fi--){const f=S.frames[fi];if(!f.rolls.length)continue;f.rolls.pop();f.leaves.pop();if(f.feedback)f.feedback.pop();if(f.paths)f.paths.pop();if(f.advice)f.advice.pop();S.frame=fi+1;S.complete=false;rebuildRack();rebuildFlags();for(let j=9;j>=0;j--){if(S.frames[j].rolls.length){S.lastThrowRef={frame:j+1,roll:S.frames[j].rolls.length};break}}return}}
+function rebuildRack(){const f=currentFrame(),r=f.rolls,l=f.leaves;if(S.frame<10){if(r.length===0){S.rack=[...ALL]}else{S.rack=[...(l[l.length-1]||ALL)]}}else{if(r.length===0)S.rack=[...ALL];else if(r.length===1)S.rack=r[0]===10?[...ALL]:[...(l[0]||[])];else if(r.length===2){if(r[0]<10){S.rack=r[0]+r[1]===10?[...ALL]:[]}else S.rack=r[1]===10?[...ALL]:[...(l[1]||[])]}}
+S.selected=[]}
+function clampBoard(v){v=Number(v);return Number.isFinite(v)?Math.max(1,Math.min(39,Math.round(v*2)/2)):20}
+function fmtBoard(v){return Number.isInteger(v)?String(v):Number(v).toFixed(1)}
+function lastPath(){for(let fi=S.frames.length-1;fi>=0;fi--){const a=S.frames[fi].paths||[];for(let i=a.length-1;i>=0;i--)if(a[i])return a[i]}return null}
+let mapPath={feet:25,release:18,arrow:10,breakpoint:7};
+function boardX(board){return 18+((39-clampBoard(board))/38)*384}
+function boardFromX(x){const ratio=(Math.max(18,Math.min(402,x))-18)/384;return clampBoard(39-ratio*38)}
+function initLaneMap(){
+  const ns='http://www.w3.org/2000/svg';
+  const lines=$('boardLines'), nums=$('boardNumbers'), arrows=$('arrowMarks');
+  if(lines.childNodes.length)return;
+  for(let b=1;b<=39;b++){const x=boardX(b);const l=document.createElementNS(ns,'line');l.setAttribute('x1',x);l.setAttribute('x2',x);l.setAttribute('y1','18');l.setAttribute('y2','362');l.setAttribute('class',(b%5===0||b===20)?'five':'board');lines.appendChild(l)}
+  [39,35,30,25,20,15,10,5,1].forEach(b=>{const t=document.createElementNS(ns,'text');t.setAttribute('x',boardX(b));t.setAttribute('y','378');t.setAttribute('text-anchor','middle');t.setAttribute('class','boardNum');t.textContent=b;nums.appendChild(t)});
+  [5,10,15,20,25,30,35].forEach(b=>{const x=boardX(b),y=178;const poly=document.createElementNS(ns,'polygon');poly.setAttribute('points',`${x},${y-8} ${x-4},${y+5} ${x+4},${y+5}`);poly.setAttribute('class','arrowMark');arrows.appendChild(poly)});
+}
+function pendingRecommended(){return S.pendingPath&&S.pendingPath.recommended?S.pendingPath.recommended:null}
+function renderRecommendedMap(){const r=pendingRecommended();$('recommendedMapBox').classList.toggle('hidden',!r);if(!r){$('recommendedDeckTarget').textContent='';return}$('recFeet').textContent=fmtBoard(r.feet);$('recRelease').textContent=fmtBoard(r.release);$('recArrow').textContent=fmtBoard(r.arrow);$('recBreak').textContent=fmtBoard(r.breakpoint);$('recTarget').textContent='Target '+(r.entry||'pocket');$('recommendedDeckTarget').textContent='Recommended target: '+(r.entry||'pocket')}
+function drawLaneMap(){
+  initLaneMap();renderRecommendedMap();
+  $('pvFeet').textContent=fmtBoard(mapPath.feet);$('pvRelease').textContent=fmtBoard(mapPath.release);$('pvArrow').textContent=fmtBoard(mapPath.arrow);$('pvBreak').textContent=fmtBoard(mapPath.breakpoint);
+  const ns='http://www.w3.org/2000/svg', recLayer=$('recommendedLineLayer');recLayer.innerHTML='';const r=pendingRecommended();if(r){const rp=[['feet',r.feet,330],['release',r.release,262],['arrow',r.arrow,178],['breakpoint',r.breakpoint,76]];const ghost=document.createElementNS(ns,'polyline');ghost.setAttribute('points',rp.map(p=>`${boardX(p[1])},${p[2]}`).join(' '));ghost.setAttribute('class','recPathline');recLayer.appendChild(ghost)}
+  const layer=$('pathLineLayer');layer.innerHTML='';
+  const pts=[['feet',mapPath.feet,330],['release',mapPath.release,262],['arrow',mapPath.arrow,178],['breakpoint',mapPath.breakpoint,76]];
+  const path=document.createElementNS(ns,'polyline');path.setAttribute('points',pts.map(p=>`${boardX(p[1])},${p[2]}`).join(' '));path.setAttribute('class','pathline');layer.appendChild(path);
+  pts.forEach(([name,b,y])=>{const halo=document.createElementNS(ns,'circle');halo.setAttribute('cx',boardX(b));halo.setAttribute('cy',y);halo.setAttribute('r','15');halo.setAttribute('class','pickHalo');halo.dataset.stage=name;layer.appendChild(halo);const c=document.createElementNS(ns,'circle');c.setAttribute('cx',boardX(b));c.setAttribute('cy',y);c.setAttribute('r','7');c.setAttribute('class','pick');c.dataset.stage=name;layer.appendChild(c);const t=document.createElementNS(ns,'text');t.setAttribute('x',boardX(b));t.setAttribute('y',y-13);t.setAttribute('text-anchor','middle');t.setAttribute('class','mapLabel');t.textContent=fmtBoard(b);layer.appendChild(t)});
+}
+function setMapBoard(stage,board){mapPath[stage]=clampBoard(board);drawLaneMap()}
+let deckHit=null;
+function useRecommended(stage){const r=pendingRecommended();if(!r)return;if(stage)mapPath[stage]=clampBoard(r[stage]);else mapPath={feet:clampBoard(r.feet),release:clampBoard(r.release),arrow:clampBoard(r.arrow),breakpoint:clampBoard(r.breakpoint)};drawLaneMap()}
+function openPathSheet(){const prev=lastPath(),rec=pendingRecommended();if(prev)mapPath={feet:prev.feet,release:prev.release,arrow:prev.arrow,breakpoint:prev.breakpoint};else if(rec)mapPath={feet:rec.feet,release:rec.release,arrow:rec.arrow,breakpoint:rec.breakpoint};else if(S.hand==='left')mapPath={feet:15,release:22,arrow:30,breakpoint:33};else mapPath={feet:25,release:18,arrow:10,breakpoint:7};deckHit=null;drawLaneMap();drawPinDeck();$('pathSheet').classList.remove('hidden');$('quickActions').style.opacity='.4'}
+function closePathSheet(){$('pathSheet').classList.add('hidden');$('quickActions').style.opacity=''}
+function firstBallAdvice(frameNo,path,knocked,leave){const ideal=S.hand==='left'?'1-2':'1-3';const entry=path.entry;if(knocked===10)return frameNo===1?`Strike. This is your opening strike line: ${path.feet} → ${path.release} → ${path.arrow} → ${path.breakpoint}, entering ${entry}. Use it as the reference for frame 2.`:`Strike line confirmed: ${path.feet} → ${path.release} → ${path.arrow} → ${path.breakpoint}, entering ${entry}. Repeat this shape.`;let msg='';if(entry===ideal)msg='You reached the ideal pocket but did not strike. Keep this line for one more clean shot and focus on repeatability before making a move.';else if(entry==='head')msg=S.hand==='left'?'You finished high on the head pin. Try moving your feet 1 board right while keeping the arrow similar.':'You finished high on the head pin. Try moving your feet 1 board left while keeping the arrow similar.';else if(S.hand==='right'&&(entry==='1-2'||entry==='far-left'))msg='The ball crossed too far left of the right-hander pocket. Move your feet 2 boards left, keep the arrow similar, and look for the 1–3 pocket.';else if(S.hand==='left'&&(entry==='1-3'||entry==='3-6'||entry==='6-10'||entry==='far-right'))msg='The ball crossed too far right of the left-hander pocket. Move your feet 2 boards right, keep the arrow similar, and look for the 1–2 pocket.';else if(S.hand==='right'&&(entry==='3-6'||entry==='6-10'||entry==='far-right'))msg='The ball arrived too light/right of the 1–3 pocket. Try moving your feet 1 board right while keeping the arrow similar.';else if(S.hand==='left'&&(entry==='1-2'||entry==='far-left'))msg='The ball arrived too light/left of the 1–2 pocket. Try moving your feet 1 board left while keeping the arrow similar.';else msg='Use this shot as a reference. The next goal is a clean entry into the pocket, then compare the line and leave.';const priorStrike=[];S.frames.slice(0,Math.max(0,frameNo-1)).forEach(f=>(f.rolls||[]).forEach((r,i)=>{if(i===0&&r===10&&f.paths&&f.paths[i])priorStrike.push(f.paths[i])}));if(priorStrike.length){const p=priorStrike[priorStrike.length-1];msg+=` Your last strike used ${p.feet} → ${p.release} → ${p.arrow} → ${p.breakpoint} (${p.entry}); compare against that.`}else if(frameNo===1){msg+=' This is the opening frame, so use this mapped shot to establish your strike reference.'}return msg}
+function saveCurrentPath(){const p=S.pendingPath;if(!p)return;if(!deckHit){alert('Tap where the ball entered the pin deck.');return}const path={feet:mapPath.feet,release:mapPath.release,arrow:mapPath.arrow,breakpoint:mapPath.breakpoint,ballId:S.context?.ballId||'',ballName:S.context?.ballName||'',entry:deckHit.entry,deckX:Math.round(deckHit.x*10)/10,deckY:Math.round(deckHit.y*10)/10,deckLabel:deckHit.label,recommended:S.pendingPath&&S.pendingPath.recommended?{...S.pendingPath.recommended}:null};const f=S.frames[p.frame-1];if(!f.paths)f.paths=[];f.paths[p.roll-1]=path;let adv='';if(p.roll===1)adv=firstBallAdvice(p.frame,path,f.rolls[p.roll-1],f.leaves[p.roll-1]||[]);if(!f.advice)f.advice=[];f.advice[p.roll-1]=adv;if(!f.feedback)f.feedback=[];f.feedback[p.roll-1]={happy:null,flag:null,label:'No feel issue flagged',suggestion:''};if(adv)S.lastSuggestion=adv;S.lastThrowRef={frame:p.frame,roll:p.roll};S.pendingFeedback=null;S.pendingPath=null;frameSheetMode='review';closeFrameSheet();renderGame()}
+const deckPinPos={7:[72,42],8:[144,42],9:[216,42],10:[288,42],4:[108,80],5:[180,80],6:[252,80],2:[144,118],3:[216,118],1:[180,156]};
+function deckPinsForPendingThrow(){
+  const p=S.pendingPath;if(!p)return ALL;
+  const f=S.frames[p.frame-1];
+  // First ball always starts from a full rack.
+  if(p.roll===1)return ALL;
+  // Second ball after a non-strike: show exactly the first-ball leave.
+  if(p.roll===2){
+    const first=(f.rolls||[])[0]??0;
+    if(first<10)return (f.leaves&&f.leaves[0])?[...f.leaves[0]]:ALL;
+    return ALL; // second ball after a strike is a fresh rack (10th-frame bonus situation)
+  }
+  // Third ball in the 10th: after a strike then non-strike, show the second-ball leave.
+  if(p.roll===3){
+    const first=(f.rolls||[])[0]??0, second=(f.rolls||[])[1]??0;
+    if(first===10&&second<10)return (f.leaves&&f.leaves[1])?[...f.leaves[1]]:ALL;
+    return ALL; // spare bonus or consecutive strikes reset the rack
+  }
+  return ALL;
+}
+function initPinDeck(){
+  const g=$('deckPins');g.innerHTML='';const ns='http://www.w3.org/2000/svg';
+  const visible=new Set(deckPinsForPendingThrow().map(Number));
+  Object.entries(deckPinPos).forEach(([pin,[x,y]])=>{if(!visible.has(Number(pin)))return;const c=document.createElementNS(ns,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r','16');c.setAttribute('class','deckPin');g.appendChild(c);const t=document.createElementNS(ns,'text');t.setAttribute('x',x);t.setAttribute('y',y+.5);t.setAttribute('class','deckPinNum');t.textContent=pin;g.appendChild(t)});
+}
+function deckEntryFromPoint(x,y){
+  let entry;if(x<52)entry='far-left';else if(x<132)entry='1-2';else if(x<166)entry='head';else if(x<224)entry='1-3';else if(x<270)entry='3-6';else if(x<318)entry='6-10';else entry='far-right';
+  const visible=new Set(deckPinsForPendingThrow().map(Number));
+  let nearest=null,dist=1e9;Object.entries(deckPinPos).forEach(([pin,[px,py]])=>{if(!visible.has(Number(pin)))return;const d=Math.hypot(x-px,y-py);if(d<dist){dist=d;nearest=pin}});
+  let label;if(x<42)label='Missed left of the deck';else if(x>318)label='Missed right of the deck';else if(nearest!==null&&dist<=20)label='Hit pin '+nearest;else label='Between pins / '+entry;
+  return {entry,label};
+}
+function drawPinDeck(){
+  initPinDeck();const layer=$('deckHitLayer');layer.innerHTML='';if(!deckHit){const pins=deckPinsForPendingThrow();$('deckStatus').textContent=pins.length<10?'Only the pins standing for this spare are shown. Tap or drag where the ball entered.':'Tap or drag where the ball entered — including beside the pins for a miss.';return}
+  const ns='http://www.w3.org/2000/svg';const ball=document.createElementNS(ns,'circle');ball.setAttribute('cx',deckHit.x);ball.setAttribute('cy',deckHit.y);ball.setAttribute('r','19');ball.setAttribute('class','deckBall');layer.appendChild(ball);
+  const l1=document.createElementNS(ns,'line');l1.setAttribute('x1',deckHit.x-7);l1.setAttribute('y1',deckHit.y);l1.setAttribute('x2',deckHit.x+7);l1.setAttribute('y2',deckHit.y);l1.setAttribute('class','deckCross');layer.appendChild(l1);const l2=document.createElementNS(ns,'line');l2.setAttribute('x1',deckHit.x);l2.setAttribute('y1',deckHit.y-7);l2.setAttribute('x2',deckHit.x);l2.setAttribute('y2',deckHit.y+7);l2.setAttribute('class','deckCross');layer.appendChild(l2);
+  $('deckStatus').textContent=deckHit.label;
+}
+function setDeckHitFromEvent(e){const svg=$('pinDeckMap'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const local=pt.matrixTransform(svg.getScreenCTM().inverse());const x=Math.max(15,Math.min(345,local.x)),y=Math.max(18,Math.min(178,local.y));const meta=deckEntryFromPoint(x,y);deckHit={x,y,...meta};drawPinDeck()}
+const feedbackOptions={
+ball:{title:'What did the ball do?',hint:'Choose the ball reaction you disliked.',items:[['hook_too_much','Hooked too much'],['hook_early','Hooked too early'],['not_hook_enough','Did not hook enough'],['skid_too_long','Skidded too long']]},
+release:{title:'What happened at release?',hint:'Execution misses usually do not need a lane adjustment.',items:[['pulled_left','Pulled / missed left'],['pushed_right','Pushed / missed right'],['grabbed','Grabbed it / came around it'],['poor_release','Release just felt poor']]},
+speed:{title:'What felt off?',hint:'Flag tempo before changing your line.',items:[['too_fast','Too fast'],['too_slow','Too slow'],['rushed','Rushed approach / timing'],['timing_late','Timing felt late']]},
+carry:{title:'What was the issue?',hint:'Useful when the shot reached the pocket but the result disappointed you.',items:[['high_pocket','Hit high'],['light_pocket','Hit light'],['good_pocket_bad_carry','Good pocket, poor carry'],['flat_hit','Flat / weak hit']]}}
+const suggestions={
+hook_too_much:'Ball is finishing too strongly. Try a small move left with your feet while keeping the same target. If it repeats on a clean shot, consider a weaker ball.',
+hook_early:'The ball is reading too early. Try moving your feet 1–2 boards left and keep your target similar. If it still reads early, consider more speed or a weaker ball.',
+not_hook_enough:'The ball is not turning enough. Try a small move right with your feet while keeping the target similar. If it repeats, consider a stronger ball.',
+skid_too_long:'The ball is getting too far downlane before reading. Try a small move right or a slightly slower, smoother shot. If it repeats, consider a stronger ball.',
+pulled_left:'Treat this as execution, not lane transition. Keep the same line and focus on sending the ball through your intended target.',
+pushed_right:'Treat this as execution first. Keep your line and commit to the target rather than moving based on one pushed shot.',
+grabbed:'Do not chase the lane yet. Keep your line and focus on a cleaner, freer release on the next shot.',
+poor_release:'No lane move yet. Repeat the same plan and judge the lane from a cleaner release.',
+too_fast:'Keep the same line. Smooth the tempo and let the swing create the speed rather than forcing it.',
+too_slow:'Keep the same line first. Use a freer swing and normal tempo; avoid steering the ball.',
+rushed:'Keep the lane plan unchanged. Slow the feet slightly and let the swing stay relaxed.',
+timing_late:'Keep the line. Focus on getting the ball into the swing earlier so the release is not forced.',
+high_pocket:'If the release was clean, a small move left with your feet is reasonable. Keep the target stable for now.',
+light_pocket:'If you hit your target cleanly, a small move right with your feet can help the ball finish stronger.',
+good_pocket_bad_carry:'Do not change immediately from one good pocket hit. Repeat it once; if poor carry repeats, consider a tiny angle or ball change.',
+flat_hit:'The hit looked weak. First confirm you hit the intended line; if it repeats, consider a slightly stronger ball or a small move right.'}
+function openFeedback(ref){if(!ref)return;S.pendingFeedback={frame:ref.frame,roll:ref.roll};$('feedbackCard').classList.remove('hidden');$('feedbackCategory').classList.remove('hidden');$('feedbackDetail').classList.add('hidden');$('feedbackSuggestion').classList.add('hidden');$('quickActions').style.opacity='.45';$('recordBtn').disabled=true;$('strikeBtn').disabled=true;$('spareBtn').disabled=true}
+function closeFeedback(){$('feedbackCard').classList.add('hidden');$('quickActions').style.opacity='';$('recordBtn').disabled=false;$('strikeBtn').disabled=false;$('spareBtn').disabled=false}
+function saveFeedback(flag,label,suggestion){const p=S.pendingFeedback;if(!p)return;const f=S.frames[p.frame-1];const idx=p.roll-1;if(f.feedback)f.feedback[idx]={happy:null,flag:flag||null,label:label||'No feel issue flagged',suggestion:suggestion||''};S.flags=S.flags.filter(x=>!(x.frame===p.frame&&x.roll===p.roll));if(flag)S.flags.push({frame:p.frame,roll:p.roll,flag,label,suggestion});if(flag)S.lastSuggestion=suggestion||S.lastSuggestion;S.pendingFeedback=null}
+function rebuildFlags(){S.flags=[];S.frames.forEach((f,fi)=>(f.feedback||[]).forEach((x,ri)=>{if(x&&x.flag)S.flags.push({frame:fi+1,roll:ri+1,flag:x.flag,label:x.label,suggestion:x.suggestion})}));S.lastSuggestion=S.flags.length?S.flags[S.flags.length-1].suggestion:''}
+function finishFeedback(suggestion){S.lastSuggestion=suggestion||'';S.pendingFeedback=null;closeFeedback();renderGame()}
+function repeatedPrefix(flag){const prior=S.flags.filter(x=>x.flag===flag);return prior.length>=1?'This has now been flagged more than once. ':''}
+function chooseDetail(flag,label){const suggestion=repeatedPrefix(flag)+(suggestions[flag]||'Keep the next shot simple and use a clean release before making a larger change.');saveFeedback(flag,label,suggestion);$('feedbackDetail').classList.add('hidden');$('feedbackSuggestion').classList.remove('hidden');$('suggestionText').textContent=suggestion}
+function save(){const arr=getSaved();arr.unshift({endedAt:new Date().toISOString(),...S});localStorage.setItem(STORAGE,JSON.stringify(arr.slice(0,100)))}
+function getSaved(){try{return JSON.parse(localStorage.getItem(STORAGE)||'[]')}catch{return[]}}
+function finish(){S.complete=true;const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}
+function renderHistory(){const arr=getSaved();$('historyList').innerHTML=arr.length?arr.map(g=>{const old=S;S=g;const sc=scoreGame();S=old;const d=new Date(g.endedAt||g.startedAt);return`<div class="historyRow"><div><strong>${d.toLocaleDateString()}</strong><div class="mini muted">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div></div><div class="right"><strong>${sc.total}</strong><div class="mini muted">10 frames</div></div></div>`}).join(''):'No games yet.'}
+
+let frameReviewState={frame:1,roll:0};
+// Hybrid lane projection: horizontal geometry is true-to-lane. Longitudinal
+// distance is intentionally compressed by zones for a usable phone view.
+// The final third of the lane gets extra visual resolution for breakpoint/hook.
+const REVIEW_Y={feet:918,foul:850,release:822,arrow:705,breakpoint:500};
+function reviewBoardX(board){const b=clampBoard(board);return 30+((39-b)/38)*300}
+function reviewDeckPoint(path){
+  if(!path||!Number.isFinite(path.deckX))return null;
+  // The compact pin-deck input uses pin centers 72..288 (7..10) and y 42..156 (back row..head pin).
+  // Map those coordinates onto the regulation pin rack inside the 41.5-inch lane.
+  const x=Math.max(24,Math.min(336,180+(path.deckX-180)*1.2531));
+  const y=Math.max(30,Math.min(315,45.5+(Number(path.deckY??156)-42)*2.057));
+  return [x,y];
+}
+function reviewSmoothPath(points){
+  // Shape-preserving cubic Hermite curve. We interpolate horizontal board
+  // position as a function of distance down-lane, which keeps the trajectory
+  // smooth while preventing the spline from inventing loops or overshooting
+  // beyond the recorded release / arrow / breakpoint / deck positions.
+  if(points.length<2)return'';
+  const pts=points.map(v=>({x:+v[0],y:+v[1]}));
+  if(pts.length===2)return`M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
+
+  // t increases as the ball travels toward the pins (screen y decreases).
+  const t=pts.map(p=>-p.y), x=pts.map(p=>p.x), n=pts.length;
+  const h=[], delta=[];
+  for(let i=0;i<n-1;i++){
+    h[i]=t[i+1]-t[i];
+    delta[i]=(x[i+1]-x[i])/h[i];
+  }
+
+  // PCHIP/Fritsch-Carlson style tangents: smooth and shape-preserving.
+  const m=new Array(n).fill(0);
+  m[0]=delta[0];
+  m[n-1]=delta[n-2];
+  for(let i=1;i<n-1;i++){
+    if(delta[i-1]===0||delta[i]===0||Math.sign(delta[i-1])!==Math.sign(delta[i])){
+      m[i]=0;
+    }else{
+      const w1=2*h[i]+h[i-1], w2=h[i]+2*h[i-1];
+      m[i]=(w1+w2)/(w1/delta[i-1]+w2/delta[i]);
+    }
+  }
+
+  // Clamp endpoint slopes so the first and final segment cannot whip around.
+  const clampEnd=(s,d)=>Math.sign(s)===Math.sign(d)?Math.sign(s)*Math.min(Math.abs(s),3*Math.abs(d)):0;
+  m[0]=clampEnd(m[0],delta[0]);
+  m[n-1]=clampEnd(m[n-1],delta[n-2]);
+
+  let d=`M ${pts[0].x} ${pts[0].y}`;
+  for(let i=0;i<n-1;i++){
+    const dt=h[i];
+    // Hermite -> cubic Bezier conversion. y is linear with distance; x uses
+    // the shape-preserving tangents above.
+    const c1x=x[i]+m[i]*dt/3;
+    const c2x=x[i+1]-m[i+1]*dt/3;
+    const c1y=pts[i].y+(pts[i+1].y-pts[i].y)/3;
+    const c2y=pts[i].y+2*(pts[i+1].y-pts[i].y)/3;
+    d+=` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${pts[i+1].x} ${pts[i+1].y}`;
+  }
+  return d;
+}
+function reviewTargetDeckPoint(entry){const p={"far-left":[30,270],"1-2":[157.4,241],"head":[180,280],"1-3":[202.6,241],"3-6":[247.7,163],"6-10":[292.8,85],"far-right":[330,270],"left side":[90,210],"right side":[270,210],"center":[180,270]};return p[entry]||[180,270]}
+function reviewLaneSvg(path,rackBefore,editable=false){
+  if(!path)return`<div class="muted" style="text-align:center;padding:20px">No mapped path for this throw.</div>`;
+  let boards='';for(let b=1;b<=39;b++){const x=reviewBoardX(b);boards+=`<line x1="${x}" y1="38" x2="${x}" y2="${REVIEW_Y.foul}" class="${(b%5===0||b===20)?'reviewLaneFive':'reviewLaneBoard'}"/>`}
+  let arrows='';[5,10,15,20,25,30,35].forEach(b=>{const x=reviewBoardX(b);arrows+=`<polygon points="${x},${REVIEW_Y.arrow-8} ${x-5},${REVIEW_Y.arrow+4} ${x+5},${REVIEW_Y.arrow+4}" class="reviewLaneArrow"/>`});
+  const pinPos={7:[44.7,45.5],8:[134.9,45.5],9:[225.1,45.5],10:[315.3,45.5],4:[89.8,123.7],5:[180,123.7],6:[270.2,123.7],2:[134.9,201.8],3:[225.1,201.8],1:[180,280]};
+  let pins='';const visible=new Set((rackBefore&&rackBefore.length?rackBefore:ALL).map(Number));Object.entries(pinPos).forEach(([n,[x,y]])=>{if(visible.has(Number(n)))pins+=`<circle cx="${x}" cy="${y}" r="16" class="reviewPin"/><text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">${n}</text>`});
+  const feet=[reviewBoardX(path.feet),REVIEW_Y.feet],release=[reviewBoardX(path.release),REVIEW_Y.release],arrow=[reviewBoardX(path.arrow),REVIEW_Y.arrow],breakp=[reviewBoardX(path.breakpoint),REVIEW_Y.breakpoint];
+  const deck=reviewDeckPoint(path);
+  const actualPts=deck?[release,arrow,breakp,deck]:[release,arrow,breakp];const d=reviewSmoothPath(actualPts);
+  let recPath='';const rec=path.recommended;if(rec){const rr=[reviewBoardX(rec.release),REVIEW_Y.release],ra=[reviewBoardX(rec.arrow),REVIEW_Y.arrow],rb=[reviewBoardX(rec.breakpoint),REVIEW_Y.breakpoint],rd=reviewTargetDeckPoint(rec.entry);const rdPath=reviewSmoothPath([rr,ra,rb,rd]);recPath=`<path d="${rdPath}" class="reviewRecommendedPath"/>`}
+  const markers=[[feet,'F','feet'],[release,'R','release'],[arrow,'A','arrow'],[breakp,'B','breakpoint']].map(([pt,l,stage])=>`<circle cx="${pt[0]}" cy="${pt[1]}" r="${editable?10:7}" class="reviewPoint" data-edit-stage="${stage}"/><text x="${pt[0]+11}" y="${pt[1]+3}" class="reviewLaneLegend">${l}</text>`).join('');
+  const deckMarker=deck?`<circle cx="${deck[0]}" cy="${deck[1]}" r="13" class="reviewPinHit"/><circle cx="${deck[0]}" cy="${deck[1]}" r="${editable?9:5}" class="reviewPoint" data-edit-stage="deck"/>`:'';
+  return `<svg class="reviewLaneSvg${editable?' editing':''}" viewBox="0 0 360 960" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${editable?'Editable':'Mapped'} bowling ball path for this throw"><rect x="24" y="30" width="312" height="828" rx="8" fill="#c89b5d" opacity=".15"/><rect x="24" y="858" width="312" height="82" rx="8" fill="#0f172a" stroke="#263247"/>${boards}<line x1="24" y1="${REVIEW_Y.foul}" x2="336" y2="${REVIEW_Y.foul}" stroke="#f8fafc" stroke-width="2"/><text x="340" y="${REVIEW_Y.foul+3}" class="reviewLaneLegend">FOUL</text>${arrows}${pins}${recPath}<path d="${d}" class="reviewActualPath" pathLength="1"/>${markers}${deckMarker}<text x="28" y="952" class="reviewLaneLegend">39 LEFT</text><text x="298" y="952" class="reviewLaneLegend">1 RIGHT</text><text x="180" y="951" text-anchor="middle" class="reviewLaneLegend">HORIZONTAL TRUE SCALE · LENGTH COMPRESSED</text></svg>`;
+}
+function rackBeforeRoll(f,rollIndex){if(rollIndex===0)return [...ALL];const prevLeave=(f.leaves||[])[rollIndex-1]||[];const prevPins=(f.rolls||[])[rollIndex-1]??0;if(prevPins===10)return [...ALL];return [...prevLeave]}
+let frameSheetMode='review', editorDragStage=null;
+function reviewBoardFromX(x){const ratio=(Math.max(30,Math.min(330,x))-30)/300;return clampBoard(39-ratio*38)}
+function currentEditorPath(){const rec=S.pendingPath?.recommended||null;return{feet:mapPath.feet,release:mapPath.release,arrow:mapPath.arrow,breakpoint:mapPath.breakpoint,deckX:deckHit?deckHit.x:null,deckY:deckHit?deckHit.y:null,entry:deckHit?deckHit.entry:null,deckLabel:deckHit?deckHit.label:null,recommended:rec}}
+function editorStageForY(y){if(y<360)return'deck';const rows=[['breakpoint',REVIEW_Y.breakpoint],['arrow',REVIEW_Y.arrow],['release',REVIEW_Y.release],['feet',REVIEW_Y.feet]];return rows.sort((a,b)=>Math.abs(a[1]-y)-Math.abs(b[1]-y))[0][0]}
+function setEditorDeckFromReview(x,y){
+  // Invert the regulation pin-rack transform used by reviewDeckPoint().
+  const dx=Math.max(0,Math.min(360,180+(x-180)/1.2531));
+  const dy=Math.max(18,Math.min(178,42+(y-45.5)/2.057));
+  const meta=deckEntryFromPoint(dx,dy);deckHit={x:dx,y:dy,...meta}
+}
+function renderThrowEditor(){const p=S.pendingPath;if(!p)return;frameSheetMode='edit';$('frameSheetTitle').textContent=`Map frame ${p.frame} · throw ${p.roll}`;$('closeFrameSheetBtn').classList.add('hidden');$('reviewLaneHost').innerHTML=reviewLaneSvg(currentEditorPath(),p.rackBefore,true);const r=p.recommended;const actual=`Feet ${fmtBoard(mapPath.feet)}<br>Release ${fmtBoard(mapPath.release)}<br>Arrow ${fmtBoard(mapPath.arrow)}<br>Break ${fmtBoard(mapPath.breakpoint)}<br>${deckHit?esc(deckHit.label):'<span style="color:#fca5a5">Tap the pin deck</span>'}`;const rec=r?`Feet ${fmtBoard(r.feet)}<br>Release ${fmtBoard(r.release)}<br>Arrow ${fmtBoard(r.arrow)}<br>Break ${fmtBoard(r.breakpoint)}<br>Target ${esc(r.entry||'pocket')}`:'No learned line yet';$('reviewTips').innerHTML=`<div class="reviewBlock"><strong>Map this throw</strong><span class="reviewData editorHint">Drag F, R, A or B left/right on the lane. Tap or drag at the pins to mark entry.</span></div><div class="reviewBlock"><strong>Actual</strong><span class="reviewData editorActual">${actual}</span></div><div class="reviewBlock"><strong>${p.roll===1?'Strike plan':'Spare plan'}</strong><span class="reviewData">${rec}</span></div>${r?`<button type="button" class="btn ghost editorUse" id="editorUseRecommended">Use recommended line</button>`:''}<button type="button" class="btn primary editorSave" id="editorSaveThrow">Save throw</button>`;const use=$('editorUseRecommended');if(use)use.onclick=()=>{useRecommended(null);renderThrowEditor()};$('editorSaveThrow').onclick=saveCurrentPath}
+function openThrowEditor(frameNo,rollIndex){const p=S.pendingPath;if(!p)return;const prev=lastPath(),rec=p.recommended;if(prev)mapPath={feet:prev.feet,release:prev.release,arrow:prev.arrow,breakpoint:prev.breakpoint};else if(rec)mapPath={feet:rec.feet,release:rec.release,arrow:rec.arrow,breakpoint:rec.breakpoint};else mapPath=S.hand==='left'?{feet:15,release:22,arrow:30,breakpoint:33}:{feet:25,release:18,arrow:10,breakpoint:7};deckHit=null;$('frameSheetBackdrop').classList.remove('hidden');$('frameSheet').classList.remove('hidden');$('frameSheetBackdrop').setAttribute('aria-hidden','false');renderThrowEditor()}
+function reviewLocal(e){const svg=$('reviewLaneHost').querySelector('svg');if(!svg)return null;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
+$('reviewLaneHost').addEventListener('pointerdown',e=>{if(frameSheetMode!=='edit')return;const loc=reviewLocal(e);if(!loc)return;editorDragStage=e.target.dataset.editStage||editorStageForY(loc.y);const svg=$('reviewLaneHost').querySelector('svg');svg?.setPointerCapture?.(e.pointerId);if(editorDragStage==='deck')setEditorDeckFromReview(loc.x,loc.y);else mapPath[editorDragStage]=reviewBoardFromX(loc.x);renderThrowEditor();e.preventDefault()});
+$('reviewLaneHost').addEventListener('pointermove',e=>{if(frameSheetMode!=='edit'||!editorDragStage)return;const loc=reviewLocal(e);if(!loc)return;if(editorDragStage==='deck')setEditorDeckFromReview(loc.x,loc.y);else mapPath[editorDragStage]=reviewBoardFromX(loc.x);renderThrowEditor();e.preventDefault()});
+$('reviewLaneHost').addEventListener('pointerup',()=>editorDragStage=null);$('reviewLaneHost').addEventListener('pointercancel',()=>editorDragStage=null);
+function renderFrameReviewThrow(frameNo,rollIndex){
+  const f=S.frames[frameNo-1];if(!f)return;rollIndex=Math.max(0,Math.min(rollIndex,f.rolls.length-1));frameReviewState={frame:frameNo,roll:rollIndex};
+  const pins=f.rolls[rollIndex],leave=f.leaves[rollIndex]||[],path=(f.paths||[])[rollIndex],fb=(f.feedback||[])[rollIndex],advice=(f.advice||[])[rollIndex]||'';
+  const isFirstBall=rollIndex===0;
+  const isStrike=isFirstBall&&pins===10;
+  // A successful strike is stronger evidence than the plan that preceded it.
+  // In review, promote that actual line to the strike reference immediately.
+  const learnedFromThisStrike=isStrike&&path?{feet:path.feet,release:path.release,arrow:path.arrow,breakpoint:path.breakpoint,entry:S.hand==='left'?'1-2':'1-3',source:'this successful strike'}:null;
+  const fallbackRec=learnedFromThisStrike||path?.recommended||(isFirstBall?strikeSetup():spareSetup(rackBeforeRoll(f,rollIndex)));
+  const reviewPath=path?{...path,recommended:fallbackRec||null}:null;$('reviewLaneHost').innerHTML=reviewLaneSvg(reviewPath,rackBeforeRoll(f,rollIndex));
+  const result=pins===10?'Strike':(rollIndex===1&&f.rolls[0]+pins===10?'Spare':pins+' down');
+  const tabs=f.rolls.map((_,i)=>`<button type="button" class="reviewThrowTab${i===rollIndex?' active':''}" data-review-roll="${i}">Throw ${i+1}</button>`).join('');
+  const actual=path?`Feet ${fmtBoard(path.feet)}<br>Release ${fmtBoard(path.release)}<br>Arrow ${fmtBoard(path.arrow)}<br>Break ${fmtBoard(path.breakpoint)}<br>${esc(path.deckLabel||path.entry||'')}`:'No mapped data';
+  const reviewRec=fallbackRec;const targetText=isFirstBall?`Strike target ${esc(reviewRec?.entry||((S.hand==='left')?'1-2':'1-3'))} pocket`:`Target ${esc(reviewRec?.entry||'')}`;const rec=reviewRec?`Feet ${fmtBoard(reviewRec.feet)}<br>Release ${fmtBoard(reviewRec.release)}<br>Arrow ${fmtBoard(reviewRec.arrow)}<br>Break ${fmtBoard(reviewRec.breakpoint)}<br>${targetText}`:(isFirstBall?'No learned strike line existed before this throw.':'—');
+  const feel=fb&&fb.flag?`Felt wrong: ${esc(fb.label||'Execution issue')}`:'No feel issue flagged';
+  $('reviewTips').innerHTML=`<div class="reviewThrowTabs">${tabs}</div><div class="reviewBlock"><strong>${result}</strong><span class="reviewData">${leave.length?'Left: '+leave.join(', '):'Deck cleared'}</span></div><div class="reviewBlock"><strong>Actual</strong><span class="reviewData">${actual}</span></div><div class="reviewBlock"><strong>${rollIndex===0?'Recommended strike line':'Recommended spare line'}</strong><span class="reviewData">${rec}</span></div>${advice?`<div class="reviewBlock"><strong>Tip</strong><span class="reviewAdvice">${esc(advice)}</span></div>`:''}<div class="reviewBlock"><strong>Feel</strong><span class="reviewData">${feel}</span>${fb&&fb.suggestion?`<div class="reviewAdvice" style="margin-top:4px">${esc(fb.suggestion)}</div>`:''}</div>`;
+  $('reviewTips').querySelectorAll('[data-review-roll]').forEach(b=>b.onclick=()=>renderFrameReviewThrow(frameNo,+b.dataset.reviewRoll));
+}
+function openFrameSheet(frameNo){
+  const f=S.frames[frameNo-1]; if(!f||!f.rolls.length)return;
+  frameSheetMode='review';$('closeFrameSheetBtn').classList.remove('hidden');$('frameSheetTitle').textContent='Frame '+frameNo;
+  $('frameSheetBackdrop').classList.remove('hidden');
+  $('frameSheet').classList.remove('hidden');
+  $('frameSheetBackdrop').setAttribute('aria-hidden','false');
+  $('reviewLaneHost').innerHTML='<div class="muted" style="text-align:center;padding:20px">Loading throw path…</div>';
+  $('reviewTips').innerHTML='';
+  try{renderFrameReviewThrow(frameNo,0)}catch(err){console.error('Frame review error',err);$('reviewLaneHost').innerHTML='<div class="muted" style="text-align:center;padding:20px">This throw does not have enough mapped data to draw the lane yet.</div>';$('reviewTips').innerHTML='<div class="reviewBlock"><strong>Frame '+frameNo+'</strong><span class="reviewData">Score data is available, but the mapped path could not be reconstructed.</span></div>'}
+  setTimeout(()=>{$('closeFrameSheetBtn').focus()},0);
+}
+function closeFrameSheet(){
+  if(frameSheetMode==='edit'&&S.pendingPath)return;
+  $('frameSheetBackdrop').classList.add('hidden'); $('frameSheet').classList.add('hidden');
+  $('frameSheetBackdrop').setAttribute('aria-hidden','true');
+}
+$('closeFrameSheetBtn').onclick=closeFrameSheet;
+$('frameSheetBackdrop').onclick=()=>{if(frameSheetMode==='review')closeFrameSheet()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('frameSheet').classList.contains('hidden'))closeFrameSheet()});
+$('profileRight').onclick=()=>{profileDraft.hand='right';setProfileSeg()};$('profileLeft').onclick=()=>{profileDraft.hand='left';setProfileSeg()};$('profileOneHand').onclick=()=>{profileDraft.style='one';setProfileSeg()};$('profileTwoHand').onclick=()=>{profileDraft.style='two';setProfileSeg()};
+let dragStage=null;
+function laneLocal(e){const svg=$('laneMap'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
+function stageForY(y){const stages=[['breakpoint',76],['arrow',178],['release',262],['feet',330]];return stages.sort((a,b)=>Math.abs(a[1]-y)-Math.abs(b[1]-y))[0][0]}
+$('laneMap').addEventListener('pointerdown',e=>{const local=laneLocal(e);dragStage=e.target.dataset.stage||e.target.closest('.zone')?.dataset.stage||stageForY(local.y);$('laneMap').setPointerCapture?.(e.pointerId);$('laneMap').classList.add('dragging');setMapBoard(dragStage,boardFromX(local.x));e.preventDefault()});
+$('laneMap').addEventListener('pointermove',e=>{if(!dragStage)return;const local=laneLocal(e);setMapBoard(dragStage,boardFromX(local.x));e.preventDefault()});
+function stopLaneDrag(e){if(!dragStage)return;dragStage=null;$('laneMap').classList.remove('dragging');try{$('laneMap').releasePointerCapture?.(e.pointerId)}catch{}}
+$('laneMap').addEventListener('pointerup',stopLaneDrag);$('laneMap').addEventListener('pointercancel',stopLaneDrag);
+let deckDragging=false;$('pinDeckMap').addEventListener('pointerdown',e=>{deckDragging=true;$('pinDeckMap').setPointerCapture?.(e.pointerId);setDeckHitFromEvent(e);e.preventDefault()});$('pinDeckMap').addEventListener('pointermove',e=>{if(!deckDragging)return;setDeckHitFromEvent(e);e.preventDefault()});$('pinDeckMap').addEventListener('pointerup',e=>{deckDragging=false;try{$('pinDeckMap').releasePointerCapture?.(e.pointerId)}catch{}});$('pinDeckMap').addEventListener('pointercancel',()=>deckDragging=false);
+document.querySelectorAll('[data-copy-rec]').forEach(b=>b.addEventListener('click',()=>useRecommended(b.dataset.copyRec)));
+$('useRecommendedBtn').onclick=()=>useRecommended(null);
+$('savePathBtn').onclick=saveCurrentPath;
+$('feltWrongBtn').onclick=()=>openFeedback(S.lastThrowRef);
+$('categoryChoices').onclick=e=>{const b=e.target.closest('[data-cat]');if(!b)return;const cfg=feedbackOptions[b.dataset.cat];$('detailTitle').textContent=cfg.title;$('detailHint').textContent=cfg.hint;$('detailChoices').innerHTML=cfg.items.map(([k,l])=>`<button class="choice" data-flag="${k}" data-label="${l}">${l}</button>`).join('');$('feedbackCategory').classList.add('hidden');$('feedbackDetail').classList.remove('hidden')};
+$('detailChoices').onclick=e=>{const b=e.target.closest('[data-flag]');if(!b)return;chooseDetail(b.dataset.flag,b.dataset.label)};
+$('backFeedbackBtn').onclick=()=>{$('feedbackDetail').classList.add('hidden');$('feedbackCategory').classList.remove('hidden')};
+$('continueBtn').onclick=()=>{closeFeedback();renderGame()};
+document.querySelectorAll('.pin').forEach(b=>b.addEventListener('click',()=>{const p=+b.dataset.pin;if(!S.rack.includes(p))return;const i=S.selected.indexOf(p);if(i>=0)S.selected.splice(i,1);else S.selected.push(p);renderPins()}));
+$('recordBtn').onclick=()=>recordWithLeave([...S.selected]);
+$('strikeBtn').onclick=strike;$('spareBtn').onclick=spare;
+$('undoBtn').onclick=()=>{snapshotBeforeLast();renderGame()};
+$('startBtn').onclick=()=>{if(!profile.name&&!profile.balls.length){openProfileEditor();return}const ball=profile.balls.find(b=>b.id===$('setupBall').value)||null;S=fresh();S.hand=profile.hand;S.context={ballId:ball?.id||'',ballName:ball?.name||'',condition:$('setupCondition').value,pattern:$('setupPattern').value,venue:$('setupVenue').value.trim(),lane:$('setupLane').value.trim()};closeFeedback();closePathSheet();frameSheetMode='review';$('frameSheet').classList.add('hidden');$('frameSheetBackdrop').classList.add('hidden');show('game');renderGame()};
+$('newGameBtn').onclick=()=>{show('home');renderProfileSummary()};
+$('endBtn').onclick=()=>{closeProfile();if(S.pendingFeedback||S.pendingPath){alert('Finish recording the current throw first.');return}if(confirm('End this game without completing all 10 frames?')){S.complete=true;const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}};
+
+const mentalTips=[
+  'Control your breathing. Smooth tempo.',
+  'Finish the shot — follow through toward your target.',
+  'Relax your grip and let the ball swing.',
+  'Wipe your hand and ball if they feel damp.',
+  'Stay balanced at the line.',
+  'Keep your eyes quiet on the target.',
+  'Commit to the shot — no steering.',
+  'Same routine, same tempo.'
+];
+let mentalTipIndex=0, mentalTipTimer=null;
+function showMentalTip(){const el=$('mindTip');if(!el)return;el.classList.add('fade');setTimeout(()=>{mentalTipIndex=(mentalTipIndex+1)%mentalTips.length;el.textContent=mentalTips[mentalTipIndex];el.classList.remove('fade')},260)}
+function startMentalTips(){if(mentalTipTimer)clearInterval(mentalTipTimer);mentalTipTimer=setInterval(showMentalTip,4200)}
+startMentalTips();
+function openProfile(){renderProfileSummary();$('profileMenuBackdrop').classList.remove('hidden');$('profileMenu').classList.remove('hidden')}
+function closeProfile(){$('profileMenuBackdrop').classList.add('hidden');$('profileMenu').classList.add('hidden')}
+$('profileBtn').onclick=openProfile;$('profileMenuBackdrop').onclick=closeProfile;$('closeProfileBtn').onclick=closeProfile;$('editProfileBtn').onclick=openProfileEditor;$('homeProfileSummary').onclick=openProfileEditor;$('cancelProfileBtn').onclick=closeProfileEditor;
+$('addBallBtn').onclick=()=>editBall(-1);
+$('saveProfileBtn').onclick=()=>{profileDraft.name=$('profileName').value.trim();profileDraft.level=$('profileLevel').value;profileDraft.units=$('profileUnits').value;profile=profileDraft;saveProfileData();closeProfileEditor();renderProfileSummary()};
+renderProfileSummary();if(!profile.name&&!profile.balls.length)setTimeout(openProfileEditor,50);
+$('historyBtn').onclick=()=>{returnScreen=sections.find(x=>!$(x).classList.contains('hidden'))||'home';renderHistory();show('history')};
+$('closeHistoryBtn').onclick=()=>show(returnScreen==='history'?'home':returnScreen);
+})();
+</script>
+</body>
+</html>
