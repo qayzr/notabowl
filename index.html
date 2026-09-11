@@ -91,6 +91,16 @@
   </div>
 
   <section id="home" class="stack">
+    <div class="stack" style="gap:8px">
+      <div id="cloudStatus" class="mini muted" role="status" aria-live="polite">Saved on this device · Google sync loading</div>
+      <div class="feedbackActions">
+        <button class="btn ghost" id="cloudConnect" type="button">Connect Google Sheets</button>
+        <button class="btn ghost hidden" id="cloudSync" type="button">Sync now</button>
+        <button class="btn ghost hidden" id="cloudDisconnect" type="button">Disconnect</button>
+        <button class="btn ghost" id="cloudExport" type="button">Export backup</button>
+      </div>
+      <button class="btn primary hidden" id="resumeGameBtn" type="button">Resume saved game</button>
+    </div>
     <div class="card setupCard">
       <div><div class="hero">Ready to bowl?</div><div class="muted" style="margin-top:7px">Set today's lane, choose your ball, then start the game.</div></div>
       <button type="button" class="profileSummary" id="homeProfileSummary"><div class="profileSummaryMain"><strong id="homeProfileName">Set up profile</strong><span id="homeProfileMeta">Handedness, style and ball bag</span></div><span>›</span></button>
@@ -252,7 +262,12 @@ let profileDraft=null;
 let S=fresh();
 function defaultProfile(){return{name:'',hand:'right',style:'one',level:'intermediate',units:'kmh',balls:[]}}
 function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_STORAGE)||'null');return p&&typeof p==='object'?{...defaultProfile(),...p,balls:Array.isArray(p.balls)?p.balls:[]}:defaultProfile()}catch{return defaultProfile()}}
-function saveProfileData(){localStorage.setItem(PROFILE_STORAGE,JSON.stringify(profile))}
+function saveProfileData(){localStorage.setItem(PROFILE_STORAGE,JSON.stringify(profile));queueCloud('profile','owner',profile)}
+function queueCloud(type,id,data){window.dispatchEvent(new CustomEvent('notabowl-save',{detail:{type,id,data}}))}
+function persistGame(){
+  try{localStorage.setItem('notabowlActiveV1',JSON.stringify(S));queueCloud('game',S.id||S.startedAt,S)}
+  catch{$('cloudStatus').textContent='Device storage is full. Export a backup before closing the app.'}
+}
 function fresh(){return{startedAt:new Date().toISOString(),hand:profile.hand||'right',context:{ballId:'',ballName:'',condition:'unknown',pattern:'unknown',venue:'',lane:''},frames:Array.from({length:10},()=>({rolls:[],leaves:[],feedback:[],paths:[],advice:[]})),frame:1,rack:[...ALL],selected:[],complete:false,pendingFeedback:null,flags:[],lastSuggestion:'',pendingPath:null,lastThrowRef:null}}
 function profileInitial(){return (profile.name||'K').trim().charAt(0).toUpperCase()||'K'}
 function ballLabel(b){return [b.name,b.weight?b.weight+' lb':'',b.type||'',b.label||''].filter(Boolean).join(' · ')}
@@ -347,7 +362,7 @@ function renderPreShotTip(){
   const chips=setup?[['Feet',setup.feet],['Release',setup.release],['Arrow',setup.arrow],['Break',setup.breakpoint]].map(([k,v])=>`<span class="tipChip">${k} ${fmtBoard(v)}</span>`).join(''):'';
   $('preShotLabel').textContent=label;$('preShotMain').textContent=main;$('preShotLine').innerHTML=chips;$('preShotMeta').textContent=meta;const el=$('preShotAdjust');el.classList.toggle('hidden',!adjust);el.innerHTML=adjust?`<strong>Last-ball adjustment:</strong> ${esc(adjust)}`:'';
 }
-function renderGame(){if(S.complete&&!S.pendingFeedback){finish();return}const sc=renderFrames($('frameGrid'));$('scoreNow').textContent=sc.total;$('frameNo').textContent=S.frame;$('throwNo').textContent=rollNumber();$('undoBtn').disabled=!S.frames.some(f=>f.rolls.length);$('feltWrongBtn').classList.toggle('hidden',!S.lastThrowRef||!!S.pendingPath);renderPins();quickButtons();renderPreShotTip();const ctx=S.context||{};$('gameContext').textContent=[ctx.ballName,ctx.venue,ctx.lane?'Lane '+ctx.lane:'',ctx.condition&&ctx.condition!=='unknown'?ctx.condition+' oil':''].filter(Boolean).join(' · ')}
+function renderGame(){persistGame();if(S.complete&&!S.pendingFeedback){finish();return}const sc=renderFrames($('frameGrid'));$('scoreNow').textContent=sc.total;$('frameNo').textContent=S.frame;$('throwNo').textContent=rollNumber();$('undoBtn').disabled=!S.frames.some(f=>f.rolls.length);$('feltWrongBtn').classList.toggle('hidden',!S.lastThrowRef||!!S.pendingPath);renderPins();quickButtons();renderPreShotTip();const ctx=S.context||{};$('gameContext').textContent=[ctx.ballName,ctx.venue,ctx.lane?'Lane '+ctx.lane:'',ctx.condition&&ctx.condition!=='unknown'?ctx.condition+' oil':''].filter(Boolean).join(' · ')}
 function recordWithLeave(leave){if(S.pendingFeedback||S.pendingPath)return;const frameBefore=S.frame,rollBefore=rollNumber(),rackBefore=[...S.rack],recommended=setupForRack(rackBefore);const leaveSet=new Set(leave);if([...leaveSet].some(p=>!rackBefore.includes(p)))return;const knocked=rackBefore.length-leave.length;const f=currentFrame();f.rolls.push(knocked);f.leaves.push([...leave].sort((a,b)=>a-b));f.feedback.push(null);if(!f.paths)f.paths=[];if(!f.advice)f.advice=[];f.paths.push(null);f.advice.push('');advanceAfterRoll(knocked,leave,rackBefore);S.selected=[];S.pendingFeedback={frame:frameBefore,roll:rollBefore,knocked,leave:[...leave]};S.pendingPath={frame:frameBefore,roll:rollBefore,rackBefore,recommended:recommended?{...recommended}:null};renderGame();openThrowEditor(frameBefore,rollBefore-1)}
 function advanceAfterRoll(knocked,leave,rackBefore){const f=currentFrame(),r=f.rolls,rn=r.length;if(S.frame<10){if(rn===1&&knocked===10){S.frame++;S.rack=[...ALL]}else if(rn===1){S.rack=[...leave]}else{S.frame++;S.rack=[...ALL]};return}
 // 10th frame
@@ -459,7 +474,7 @@ function rebuildFlags(){S.flags=[];S.frames.forEach((f,fi)=>(f.feedback||[]).for
 function finishFeedback(suggestion){S.lastSuggestion=suggestion||'';S.pendingFeedback=null;closeFeedback();renderGame()}
 function repeatedPrefix(flag){const prior=S.flags.filter(x=>x.flag===flag);return prior.length>=1?'This has now been flagged more than once. ':''}
 function chooseDetail(flag,label){const suggestion=repeatedPrefix(flag)+(suggestions[flag]||'Keep the next shot simple and use a clean release before making a larger change.');saveFeedback(flag,label,suggestion);$('feedbackDetail').classList.add('hidden');$('feedbackSuggestion').classList.remove('hidden');$('suggestionText').textContent=suggestion}
-function save(){const arr=getSaved();arr.unshift({endedAt:new Date().toISOString(),...S});localStorage.setItem(STORAGE,JSON.stringify(arr.slice(0,100)))}
+function save(){S.endedAt=S.endedAt||new Date().toISOString();const arr=getSaved().filter(g=>g.startedAt!==S.startedAt);arr.unshift({...S});localStorage.setItem(STORAGE,JSON.stringify(arr));localStorage.removeItem('notabowlActiveV1');queueCloud('game',S.id||S.startedAt,S);$('resumeGameBtn').classList.add('hidden')}
 function getSaved(){try{return JSON.parse(localStorage.getItem(STORAGE)||'[]')}catch{return[]}}
 function finish(){S.complete=true;const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}
 function renderHistory(){const arr=getSaved();$('historyList').innerHTML=arr.length?arr.map(g=>{const old=S;S=g;const sc=scoreGame();S=old;const d=new Date(g.endedAt||g.startedAt);return`<div class="historyRow"><div><strong>${d.toLocaleDateString()}</strong><div class="mini muted">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div></div><div class="right"><strong>${sc.total}</strong><div class="mini muted">10 frames</div></div></div>`}).join(''):'No games yet.'}
@@ -642,7 +657,31 @@ $('saveProfileBtn').onclick=()=>{profileDraft.name=$('profileName').value.trim()
 renderProfileSummary();if(!profile.name&&!profile.balls.length)setTimeout(openProfileEditor,50);
 $('historyBtn').onclick=()=>{returnScreen=sections.find(x=>!$(x).classList.contains('hidden'))||'home';renderHistory();show('history')};
 $('closeHistoryBtn').onclick=()=>show(returnScreen==='history'?'home':returnScreen);
+function readActive(){try{return JSON.parse(localStorage.getItem('notabowlActiveV1')||'null')}catch{return null}}
+let resumeCandidate=readActive();
+function updateResume(){const btn=$('resumeGameBtn');btn.classList.toggle('hidden',!resumeCandidate||!!resumeCandidate.endedAt);if(resumeCandidate)btn.textContent='Resume game · '+new Date(resumeCandidate.startedAt).toLocaleString()}
+updateResume();
+$('resumeGameBtn').onclick=()=>{if(!resumeCandidate)return;S=JSON.parse(JSON.stringify(resumeCandidate));show('game');renderGame();if(S.pendingPath)openThrowEditor(S.pendingPath.frame,S.pendingPath.roll-1);else if(S.pendingFeedback)openFeedback(S.pendingFeedback)};
+window.NotabowlData={export:()=>({profile:JSON.parse(localStorage.getItem(PROFILE_STORAGE)||'null'),games:getSaved(),active:readActive()})};
+window.addEventListener('notabowl-cloud-data',event=>{
+  try{
+    const records=event.detail,p=records.find(e=>e.type==='profile');
+    if(p&&$('profileEditor').classList.contains('hidden')){profile={...defaultProfile(),...p.data};localStorage.setItem(PROFILE_STORAGE,JSON.stringify(profile));renderProfileSummary()}
+    const merged=new Map(getSaved().map(g=>[g.id||g.startedAt,g]));
+    for(const e of records.filter(e=>e.type==='game'&&e.data.endedAt))merged.set(e.entityId,e.data);
+    localStorage.setItem(STORAGE,JSON.stringify([...merged.values()].sort((a,b)=>b.startedAt.localeCompare(a.startedAt))));
+    const active=records.filter(e=>e.type==='game'&&!e.data.endedAt).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+    resumeCandidate=active[0]?.data||null;updateResume();
+    if(!$('history').classList.contains('hidden'))renderHistory();
+  }catch{$('cloudStatus').textContent='Could not restore cloud data. Export a backup and check device storage.'}
+});
+// Persist feedback immediately; recording must survive closing the tab.
+document.addEventListener('click',()=>{if(!$('game').classList.contains('hidden')&&!S.endedAt)persistGame()});
+window.addEventListener('pagehide',()=>{if(!$('game').classList.contains('hidden')&&!S.endedAt)persistGame()});
 })();
 </script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script type="module" src="./sheets-sync.mjs"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
 </body>
 </html>
