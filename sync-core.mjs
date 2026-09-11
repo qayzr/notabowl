@@ -9,6 +9,7 @@ export const PROJECTIONS = {
 };
 export function projectionRows(e) {
   if(e.type==='profile')return {Balls:e.data.balls.map(b=>[e.id,e.owner,b.id,e.revision,b.name,b.weight||'',b.type||'',b.label||''])};
+  if(e.data.deletedAt)return {Throws:[]};
   return {Throws:e.data.frames.flatMap((f,fi)=>f.rolls.map((pins,ri)=>[e.id,e.owner,e.entityId+':'+(fi+1)+':'+(ri+1),e.entityId,e.revision,fi+1,ri+1,pins,JSON.stringify(f.leaves[ri]||[]),JSON.stringify(f.paths?.[ri]||null),JSON.stringify(f.feedback?.[ri]||null)]))};
 }
 

@@ -71,6 +71,7 @@ test('starting and recording a throw persist the active game before closure',()=
   const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)]]),app=boot(storage);
   app.element('startBtn').onclick();app.element('strikeBtn').onclick();
   const active=JSON.parse(storage.get('notabowlActiveV1'));assert.equal(active.frames[0].rolls[0],10);assert.equal(active.pendingPath.frame,1);
+  app.element('historyBtn').onclick();assert.match(app.element('historyList').innerHTML,/In progress/);assert.match(app.element('historyList').innerHTML,/Resume/);assert.match(app.element('historyList').innerHTML,/Continue at frame 1/);
   const reload=boot(storage);assert.equal(reload.element('resumeGameBtn').classList.contains('hidden'),false);
   reload.element('resumeGameBtn').onclick();assert.equal(reload.element('game').classList.contains('hidden'),false);
 });
@@ -78,6 +79,12 @@ test('ending repeatedly saves only one game and clears active recovery',()=>{
   const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)]]),app=boot(storage);
   app.element('startBtn').onclick();app.element('endBtn').onclick();app.element('endBtn').onclick();
   assert.equal(JSON.parse(storage.get('bowlingNotesGamesV1')).length,1);assert.equal(storage.has('notabowlActiveV1'),false);
+  app.element('historyBtn').onclick();assert.match(app.element('historyList').innerHTML,/Completed/);assert.match(app.element('historyList').innerHTML,/View game/);
+});
+test('deleted games sync as tombstones without duplicating throw projections',()=>{
+  const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)]]),app=boot(storage);app.element('startBtn').onclick();app.element('endBtn').onclick();
+  const game={...JSON.parse(storage.get('bowlingNotesGamesV1'))[0],deletedAt:new Date().toISOString()};
+  const event=makeEvent([],'game',game.startedAt,game,'deleted');assert.deepEqual(projectionRows(event).Throws,[]);
 });
 test('clear all waits for cloud deletion before resetting local data',async()=>{
   const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)],['bowlingNotesGamesV1','[]'],['notabowlActiveV1','{}']]),app=boot(storage);

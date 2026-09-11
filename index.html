@@ -28,6 +28,7 @@
 .preShotTip{border:1px solid #1d4ed8;background:#0d1b35;border-radius:14px;padding:9px 11px;display:grid;gap:5px}.preShotTip .tipLabel{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#93c5fd;font-weight:900}.preShotTip .tipMain{font-size:14px;font-weight:850;line-height:1.25;color:#dbeafe}.preShotTip .tipMeta{font-size:10.5px;color:#94a3b8;line-height:1.3}.preShotTip .tipLine{display:flex;gap:5px;flex-wrap:wrap}.preShotTip .tipChip{border:1px solid #27466f;background:#101d33;border-radius:999px;padding:3px 7px;font-size:10px;color:#dbeafe;font-weight:750}.preShotTip .tipAdjust{border-top:1px solid #27466f;padding-top:5px;font-size:10.5px;line-height:1.3;color:#bfdbfe}.preShotTip .tipAdjust strong{color:#dbeafe}
 
 .profileBtn{border:1px solid var(--line);background:#0c1424;border-radius:999px;padding:3px;min-width:46px;min-height:46px;display:grid;place-items:center}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#334155;color:#f8fafc;font-weight:900}.avatar.big{width:48px;height:48px}.profileMenu{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(420px,100%);z-index:70;background:#111827;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom));display:grid;gap:10px}.profileHead{display:flex;gap:10px;align-items:center;margin-bottom:4px}.mindTip{text-align:center;font-weight:800;color:#dbeafe;min-height:20px;opacity:1;transition:opacity .45s ease;font-size:13px}.mindTip.fade{opacity:.15}
+.gamesList{display:grid;gap:10px}.gameCard{border:1px solid var(--line);border-radius:14px;background:#0c1424;padding:12px;display:grid;gap:10px}.gameCardTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.gameCardTitle{font-weight:850}.gameBadge{border-radius:999px;padding:4px 8px;font-size:10px;font-weight:850;background:#13291a;color:#bbf7d0}.gameBadge.complete{background:#172033;color:#cbd5e1}.gameMeta{font-size:11px;color:var(--muted);line-height:1.5}.gameCardActions{display:grid;grid-template-columns:1fr auto;gap:8px}.gameCardActions .btn{min-height:40px;padding:8px 11px;font-size:12px}
 .loginScreen{min-height:100dvh;width:min(440px,100%);margin:auto;padding:24px 18px;display:grid;place-items:center}.loginCard{width:100%;background:rgba(17,24,39,.97);border:1px solid var(--line);border-radius:22px;padding:26px 20px;display:grid;gap:18px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.3)}.loginMark{width:68px;height:68px;margin:auto;border-radius:22px;background:var(--accent);color:#07130a;display:grid;place-items:center;font-size:34px;font-weight:950}.loginTitle{font-size:30px;font-weight:900}.loginCopy{color:var(--muted);font-size:14px;line-height:1.5}.loginStatus{min-height:18px}
 
 /* Full frame trajectory review */
@@ -76,7 +77,7 @@
     <div class="sheetHandle"></div>
     <div class="profileHead"><div class="avatar big" id="menuAvatar">K</div><div><strong id="menuProfileName">Bowling profile</strong><div class="menuProfileLine" id="menuProfileSummary">Set up your bowling profile</div></div></div>
     <button class="btn ghost" id="editProfileBtn">Edit profile & ball bag</button>
-    <button class="btn ghost" id="historyBtn">History</button>
+    <button class="btn ghost" id="historyBtn">Games</button>
     <button class="btn danger" id="clearAllDataBtn">Clear all data</button>
     <button class="btn danger" id="endBtn">End game</button>
     <button class="btn ghost" id="closeProfileBtn">Close</button>
@@ -236,9 +237,9 @@
 
   <section id="summary" class="stack hidden">
     <div class="card stack">
-      <div><div class="mini muted">Game complete</div><div class="hero">Final score: <span id="finalScore">0</span></div></div>
+      <div><div class="mini muted" id="summaryEyebrow">Game complete</div><div class="hero">Final score: <span id="finalScore">0</span></div></div>
       <div class="framegrid" id="summaryGrid"></div>
-      <div class="toast">Saved on this device.</div>
+      <div class="toast" id="summaryStatus">Saved on this device.</div>
       <button class="btn primary" id="newGameBtn">Start another game</button>
     </div>
   </section>
@@ -257,17 +258,18 @@
 
   <section id="history" class="stack hidden">
     <div class="card stack">
-      <div class="scoreTop"><div class="hero">History</div><button class="btn ghost mini" id="closeHistoryBtn">Close</button></div>
-      <div id="historyList" class="muted">No games yet.</div>
+      <div class="scoreTop"><div><div class="hero">Games</div><div class="mini muted" style="margin-top:4px">Resume unfinished games or review saved frames.</div></div><button class="btn ghost mini" id="closeHistoryBtn">Close</button></div>
+      <div id="historyList" class="gamesList">No games yet.</div>
     </div>
   </section>
 </div>
 <script>
 (()=>{
-const ALL=[1,2,3,4,5,6,7,8,9,10], STORAGE='bowlingNotesGamesV1', PROFILE_STORAGE='bowlingNotesProfileV1';
+const ALL=[1,2,3,4,5,6,7,8,9,10], STORAGE='bowlingNotesGamesV1', PROFILE_STORAGE='bowlingNotesProfileV1', ACTIVE_SAVED_STORAGE='notabowlActiveSavedAtV1';
 const $=id=>document.getElementById(id), sections=['home','game','summary','history'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 let returnScreen='home';
+let summaryMode='complete',cloudGameEvents=[];
 let profile=loadProfile();
 let profileDraft=null;
 let S=fresh();
@@ -276,7 +278,7 @@ function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_STORA
 function saveProfileData(){localStorage.setItem(PROFILE_STORAGE,JSON.stringify(profile));queueCloud('profile','owner',profile)}
 function queueCloud(type,id,data){window.dispatchEvent(new CustomEvent('notabowl-save',{detail:{type,id,data}}))}
 function persistGame(){
-  try{localStorage.setItem('notabowlActiveV1',JSON.stringify(S));queueCloud('game',S.id||S.startedAt,S)}
+  try{localStorage.setItem('notabowlActiveV1',JSON.stringify(S));localStorage.setItem(ACTIVE_SAVED_STORAGE,new Date().toISOString());queueCloud('game',S.id||S.startedAt,S)}
   catch{$('cloudStatus').textContent='Device storage is full. Export a backup before closing the app.'}
 }
 function fresh(){return{startedAt:new Date().toISOString(),hand:profile.hand||'right',context:{ballId:'',ballName:'',condition:'unknown',pattern:'unknown',venue:'',lane:''},frames:Array.from({length:10},()=>({rolls:[],leaves:[],feedback:[],paths:[],advice:[]})),frame:1,rack:[...ALL],selected:[],complete:false,pendingFeedback:null,flags:[],lastSuggestion:'',pendingPath:null,lastThrowRef:null}}
@@ -488,10 +490,34 @@ function rebuildFlags(){S.flags=[];S.frames.forEach((f,fi)=>(f.feedback||[]).for
 function finishFeedback(suggestion){S.lastSuggestion=suggestion||'';S.pendingFeedback=null;closeFeedback();renderGame()}
 function repeatedPrefix(flag){const prior=S.flags.filter(x=>x.flag===flag);return prior.length>=1?'This has now been flagged more than once. ':''}
 function chooseDetail(flag,label){const suggestion=repeatedPrefix(flag)+(suggestions[flag]||'Keep the next shot simple and use a clean release before making a larger change.');saveFeedback(flag,label,suggestion);$('feedbackDetail').classList.add('hidden');$('feedbackSuggestion').classList.remove('hidden');$('suggestionText').textContent=suggestion}
-function save(){S.endedAt=S.endedAt||new Date().toISOString();const arr=getSaved().filter(g=>g.startedAt!==S.startedAt);arr.unshift({...S});localStorage.setItem(STORAGE,JSON.stringify(arr));localStorage.removeItem('notabowlActiveV1');queueCloud('game',S.id||S.startedAt,S);$('resumeGameBtn').classList.add('hidden')}
+function save(){S.endedAt=S.endedAt||new Date().toISOString();const arr=getSaved().filter(g=>g.startedAt!==S.startedAt);arr.unshift({...S});localStorage.setItem(STORAGE,JSON.stringify(arr));localStorage.removeItem('notabowlActiveV1');localStorage.removeItem(ACTIVE_SAVED_STORAGE);queueCloud('game',S.id||S.startedAt,S);$('resumeGameBtn').classList.add('hidden')}
 function getSaved(){try{return JSON.parse(localStorage.getItem(STORAGE)||'[]')}catch{return[]}}
-function finish(){S.complete=true;const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}
-function renderHistory(){const arr=getSaved();$('historyList').innerHTML=arr.length?arr.map(g=>{const old=S;S=g;const sc=scoreGame();S=old;const d=new Date(g.endedAt||g.startedAt);return`<div class="historyRow"><div><strong>${d.toLocaleDateString()}</strong><div class="mini muted">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div></div><div class="right"><strong>${sc.total}</strong><div class="mini muted">10 frames</div></div></div>`}).join(''):'No games yet.'}
+function finish(){S.complete=true;summaryMode='complete';$('summaryEyebrow').textContent='Game complete';$('summaryStatus').textContent='Saved on this device and syncing to Google Sheets.';$('newGameBtn').textContent='Start another game';const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}
+function gameId(g){return g.id||g.startedAt}
+function gameScore(g){const old=S;S=g;const score=scoreGame().total;S=old;return score}
+function gameProgress(g){const frames=Array.isArray(g?.frames)?g.frames:[],played=frames.reduce((n,f)=>n+(Array.isArray(f?.rolls)?f.rolls.length:0),0),last=frames.reduce((n,f,i)=>f?.rolls?.length?i+1:n,0),resume=g?.pendingPath?.frame||g?.pendingFeedback?.frame||g?.frame||last||1;return{played,last:last||1,resume}}
+function gameEntries(){
+  const entries=new Map();
+  for(const e of cloudGameEvents){if(e.data.deletedAt)entries.delete(e.entityId);else entries.set(e.entityId,{game:e.data,updatedAt:e.updatedAt})}
+  for(const g of getSaved())if(!g.deletedAt)entries.set(gameId(g),{game:g,updatedAt:g.endedAt||g.startedAt});
+  const active=readActive();if(active&&!active.deletedAt)entries.set(gameId(active),{game:active,updatedAt:localStorage.getItem(ACTIVE_SAVED_STORAGE)||active.startedAt});
+  return[...entries.entries()].map(([id,value])=>({id,...value})).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+}
+function resumeStoredGame(game){resumeCandidate=JSON.parse(JSON.stringify(game));S=JSON.parse(JSON.stringify(game));show('game');renderGame();if(S.pendingPath)openThrowEditor(S.pendingPath.frame,S.pendingPath.roll-1);else if(S.pendingFeedback)openFeedback(S.pendingFeedback)}
+function viewStoredGame(game){S=JSON.parse(JSON.stringify(game));summaryMode='review';returnScreen='home';$('summaryEyebrow').textContent='Saved game';$('summaryStatus').textContent='Tap any completed frame to review its throws.';$('newGameBtn').textContent='Back to games';const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;show('summary')}
+function removeStoredGame(id,game,active){
+  const action=active?'abandon this unfinished game':'remove this saved game';if(!confirm(`Permanently ${action}?`))return;
+  const deletedAt=new Date().toISOString(),tombstone={...game,complete:true,endedAt:game.endedAt||deletedAt,deletedAt,pendingFeedback:null,pendingPath:null};
+  localStorage.setItem(STORAGE,JSON.stringify(getSaved().filter(g=>gameId(g)!==id)));
+  if(gameId(readActive()||{})===id){localStorage.removeItem('notabowlActiveV1');localStorage.removeItem(ACTIVE_SAVED_STORAGE);resumeCandidate=null;updateResume()}
+  cloudGameEvents=cloudGameEvents.filter(e=>e.entityId!==id);cloudGameEvents.push({entityId:id,updatedAt:deletedAt,data:tombstone});queueCloud('game',id,tombstone);renderHistory();
+}
+function renderHistory(){
+  const entries=gameEntries();$('historyList').innerHTML=entries.length?entries.map(({id,game,updatedAt})=>{const active=!game.endedAt,progress=gameProgress(game),when=new Date(updatedAt||game.startedAt),venue=game.context?.venue?` · ${esc(game.context.venue)}`:'';return`<article class="gameCard"><div class="gameCardTop"><div><div class="gameCardTitle">${new Date(game.startedAt).toLocaleString()}</div><div class="gameMeta">${active?`Continue at frame ${progress.resume} · ${progress.played} throw${progress.played===1?'':'s'}`:`Score ${gameScore(game)} · ${progress.played} throws`}${venue}<br>Last saved ${when.toLocaleString()}</div></div><span class="gameBadge${active?'':' complete'}">${active?'In progress':'Completed'}</span></div><div class="gameCardActions"><button class="btn ${active?'primary':'ghost'}" data-${active?'resume':'view'}-game="${esc(id)}">${active?'Resume':'View game'}</button><button class="btn danger" data-remove-game="${esc(id)}">${active?'Abandon':'Remove'}</button></div></article>`}).join(''):'<div class="muted">No saved games yet.</div>';
+  $('historyList').querySelectorAll('[data-resume-game]').forEach(button=>button.onclick=()=>{const entry=gameEntries().find(x=>x.id===button.dataset.resumeGame);if(entry)resumeStoredGame(entry.game)});
+  $('historyList').querySelectorAll('[data-view-game]').forEach(button=>button.onclick=()=>{const entry=gameEntries().find(x=>x.id===button.dataset.viewGame);if(entry)viewStoredGame(entry.game)});
+  $('historyList').querySelectorAll('[data-remove-game]').forEach(button=>button.onclick=()=>{const entry=gameEntries().find(x=>x.id===button.dataset.removeGame);if(entry)removeStoredGame(entry.id,entry.game,!entry.game.endedAt)});
+}
 
 let frameReviewState={frame:1,roll:0};
 // Hybrid lane projection: horizontal geometry is true-to-lane. Longitudinal
@@ -651,8 +677,8 @@ $('recordBtn').onclick=()=>recordWithLeave([...S.selected]);
 $('strikeBtn').onclick=strike;$('spareBtn').onclick=spare;
 $('undoBtn').onclick=()=>{snapshotBeforeLast();renderGame()};
 $('startBtn').onclick=()=>{if(!profile.name&&!profile.balls.length){openProfileEditor();return}const ball=profile.balls.find(b=>b.id===$('setupBall').value)||null;S=fresh();S.hand=profile.hand;S.context={ballId:ball?.id||'',ballName:ball?.name||'',condition:$('setupCondition').value,pattern:$('setupPattern').value,venue:$('setupVenue').value.trim(),lane:$('setupLane').value.trim()};closeFeedback();closePathSheet();frameSheetMode='review';$('frameSheet').classList.add('hidden');$('frameSheetBackdrop').classList.add('hidden');show('game');renderGame()};
-$('newGameBtn').onclick=()=>{show('home');renderProfileSummary()};
-$('endBtn').onclick=()=>{closeProfile();if(S.pendingFeedback||S.pendingPath){alert('Finish recording the current throw first.');return}if(confirm('End this game without completing all 10 frames?')){S.complete=true;const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}};
+$('newGameBtn').onclick=()=>{if(summaryMode==='review'){renderHistory();show('history');return}show('home');renderProfileSummary()};
+$('endBtn').onclick=()=>{closeProfile();if(S.pendingFeedback||S.pendingPath){alert('Finish recording the current throw first.');return}if(confirm('End this game without completing all 10 frames?')){S.complete=true;summaryMode='complete';$('summaryEyebrow').textContent='Game ended';$('summaryStatus').textContent='Saved on this device and syncing to Google Sheets.';$('newGameBtn').textContent='Start another game';const sc=renderFrames($('summaryGrid'));$('finalScore').textContent=sc.total;save();show('summary')}};
 
 const mentalTips=[
   'Control your breathing. Smooth tempo.',
@@ -678,7 +704,7 @@ $('clearAllDataBtn').onclick=async event=>{
   try{
     if(!window.NotabowlSync?.clearAll)throw new Error('Google sync is still loading. Try again in a moment.');
     await window.NotabowlSync.clearAll();
-    localStorage.removeItem(PROFILE_STORAGE);localStorage.removeItem(STORAGE);localStorage.removeItem('notabowlActiveV1');
+    localStorage.removeItem(PROFILE_STORAGE);localStorage.removeItem(STORAGE);localStorage.removeItem('notabowlActiveV1');localStorage.removeItem(ACTIVE_SAVED_STORAGE);
     profile=defaultProfile();profileDraft=null;S=fresh();resumeCandidate=null;
     closeProfile();closeProfileEditor();closeFeedback();closePathSheet();show('home');renderProfileSummary();updateResume();
   }catch(error){$('cloudStatus').textContent=error.message||'Could not clear all data. Nothing was deleted from this device.'}
@@ -689,20 +715,20 @@ $('saveProfileBtn').onclick=()=>{profileDraft.name=$('profileName').value.trim()
 renderProfileSummary();if(!profile.name&&!profile.balls.length)setTimeout(openProfileEditor,50);
 $('historyBtn').onclick=()=>{returnScreen=sections.find(x=>!$(x).classList.contains('hidden'))||'home';renderHistory();show('history')};
 $('closeHistoryBtn').onclick=()=>show(returnScreen==='history'?'home':returnScreen);
-function readActive(){try{return JSON.parse(localStorage.getItem('notabowlActiveV1')||'null')}catch{return null}}
+function readActive(){try{const game=JSON.parse(localStorage.getItem('notabowlActiveV1')||'null');return game&&typeof game.startedAt==='string'&&Array.isArray(game.frames)?game:null}catch{return null}}
 let resumeCandidate=readActive();
-function updateResume(){const btn=$('resumeGameBtn');btn.classList.toggle('hidden',!resumeCandidate||!!resumeCandidate.endedAt);if(resumeCandidate)btn.textContent='Resume game · '+new Date(resumeCandidate.startedAt).toLocaleString()}
+function updateResume(){const btn=$('resumeGameBtn');btn.classList.toggle('hidden',!resumeCandidate||!!resumeCandidate.endedAt);if(resumeCandidate)btn.textContent='Resume frame '+gameProgress(resumeCandidate).resume+' · '+new Date(resumeCandidate.startedAt).toLocaleString()}
 updateResume();
-$('resumeGameBtn').onclick=()=>{if(!resumeCandidate)return;S=JSON.parse(JSON.stringify(resumeCandidate));show('game');renderGame();if(S.pendingPath)openThrowEditor(S.pendingPath.frame,S.pendingPath.roll-1);else if(S.pendingFeedback)openFeedback(S.pendingFeedback)};
+$('resumeGameBtn').onclick=()=>{if(resumeCandidate)resumeStoredGame(resumeCandidate)};
 window.NotabowlData={export:()=>({profile:JSON.parse(localStorage.getItem(PROFILE_STORAGE)||'null'),games:getSaved(),active:readActive()})};
 window.addEventListener('notabowl-cloud-data',event=>{
   try{
-    const records=event.detail,p=records.find(e=>e.type==='profile');
+    const records=event.detail,p=records.find(e=>e.type==='profile');cloudGameEvents=records.filter(e=>e.type==='game');
     if(p&&$('profileEditor').classList.contains('hidden')){profile={...defaultProfile(),...p.data};localStorage.setItem(PROFILE_STORAGE,JSON.stringify(profile));renderProfileSummary()}
     const merged=new Map(getSaved().map(g=>[g.id||g.startedAt,g]));
-    for(const e of records.filter(e=>e.type==='game'&&e.data.endedAt))merged.set(e.entityId,e.data);
+    for(const e of cloudGameEvents){if(e.data.deletedAt)merged.delete(e.entityId);else if(e.data.endedAt)merged.set(e.entityId,e.data)}
     localStorage.setItem(STORAGE,JSON.stringify([...merged.values()].sort((a,b)=>b.startedAt.localeCompare(a.startedAt))));
-    const active=records.filter(e=>e.type==='game'&&!e.data.endedAt).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+    const active=cloudGameEvents.filter(e=>!e.data.endedAt&&!e.data.deletedAt).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
     resumeCandidate=active[0]?.data||null;updateResume();
     if(!$('history').classList.contains('hidden'))renderHistory();
   }catch{$('cloudStatus').textContent='Could not restore cloud data. Export a backup and check device storage.'}
