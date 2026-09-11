@@ -47,13 +47,13 @@ function boot(storage=new Map()){
   const element=id=>{
     if(elements.has(id))return elements.get(id);
     const hidden=new Set(['game','summary','history','profileEditor','frameSheet','resumeGameBtn'].includes(id)?['hidden']:[]);
-    const el={value:'',style:{},dataset:{},textContent:'',innerHTML:'',classList:{contains:x=>hidden.has(x),add:x=>hidden.add(x),remove:x=>hidden.delete(x),toggle(x,force){const on=force??!hidden.has(x);on?hidden.add(x):hidden.delete(x)}},addEventListener(){},querySelectorAll:()=>[],appendChild(){},setAttribute(){},focus(){}};
+    const el={value:'',style:{},dataset:{},textContent:'',innerHTML:'',childNodes:[],classList:{contains:x=>hidden.has(x),add:x=>hidden.add(x),remove:x=>hidden.delete(x),toggle(x,force){const on=force??!hidden.has(x);on?hidden.add(x):hidden.delete(x)}},addEventListener(){},querySelectorAll:()=>[],appendChild(){},setAttribute(){},focus(){}};
     elements.set(id,el);return el;
   };
   const listeners={};
   const context={document:{getElementById:element,querySelectorAll:()=>[],createElementNS:()=>element('svg'+Math.random()),addEventListener(){}},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setTimeout(){},setInterval(){},clearInterval(){},alert(){},confirm:()=>true,CustomEvent:class{constructor(type,args){this.type=type;this.detail=args.detail}},console};
   context.window={addEventListener:(type,fn)=>listeners[type]=fn,dispatchEvent:e=>listeners[e.type]?.(e)};
-  vm.createContext(context);const source=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];const instrumented=source.replace(/\}\)\(\);\s*$/,'window.NotabowlTest={leadPin,genericSpareSetup,trajectoryCompareMarkup};})();');new vm.Script(instrumented).runInContext(context);
+  vm.createContext(context);const source=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];const instrumented=source.replace(/\}\)\(\);\s*$/,'window.NotabowlTest={leadPin,genericSpareSetup,recommendedImpactLabel,trajectoryCompareMarkup,useRecommended,setPending(p){S.pendingPath=p},getDeckHit(){return deckHit}};})();');new vm.Script(instrumented).runInContext(context);
   context.window.NotabowlSync={};
   return {element,storage,data:context.window.NotabowlData,sync:context.window.NotabowlSync,logic:context.window.NotabowlTest};
 }
@@ -63,6 +63,9 @@ test('spare recommendations identify the lead pin to hit',()=>{
   assert.equal(app.logic.leadPin([6,10]),6);assert.equal(recommendation.hitPin,6);assert.equal(app.logic.genericSpareSetup([10]).hitPin,10);
   const comparison=app.logic.trajectoryCompareMarkup({feet:35,release:30,arrow:20,breakpoint:6,deckLabel:'Hit pin 6'},recommendation,[6,10]);
   assert.match(comparison,/Actual/);assert.match(comparison,/Recommended/);assert.match(comparison,/Pin 6/);
+  assert.equal(app.logic.recommendedImpactLabel({entry:'1-3',hitPin:1},[1,2,3,4,5,6,7,8,9,10]),'1–3 pocket');
+  app.logic.setPending({rackBefore:[6,10],recommended:recommendation});app.logic.useRecommended(null);assert.equal(app.logic.getDeckHit().label,'Hit pin 6');
+  app.logic.setPending({rackBefore:[1,2,3,4,5,6,7,8,9,10],recommended:{...recommendation,entry:'1-3',hitPin:1}});app.logic.useRecommended(null);assert.equal(app.logic.getDeckHit().label,'1–3 pocket');
 });
 test('starting and recording a throw persist the active game before closure',()=>{
   const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)]]),app=boot(storage);
