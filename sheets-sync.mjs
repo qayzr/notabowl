@@ -2,8 +2,11 @@ import {OWNER,CLIENT_ID,SHEET_ID,HEADERS,TABLES,PROJECTIONS,projectionRows,lates
 
 const status=document.getElementById('cloudStatus'), connect=document.getElementById('cloudConnect');
 const syncButton=document.getElementById('cloudSync'), disconnect=document.getElementById('cloudDisconnect');
+const loginScreen=document.getElementById('loginScreen'),loginButton=document.getElementById('loginGoogleBtn'),loginStatus=document.getElementById('loginStatus'),app=document.getElementById('app');
 let token='',expires=0,busy=false,retry=0,timer,db,chain=Promise.resolve(),session=0;
-const notify=text=>{status.textContent=text};
+const notify=text=>{status.textContent=text;if(loginStatus)loginStatus.textContent=text};
+const showLogin=text=>{loginScreen.classList.remove('hidden');app.classList.add('hidden');if(text)notify(text)};
+const showApp=()=>{loginScreen.classList.add('hidden');app.classList.remove('hidden')};
 const ready=new Promise((resolve,reject)=>{
   const request=indexedDB.open('notabowl-sync-v1',1);
   request.onupgradeneeded=()=>request.result.createObjectStore('events',{keyPath:'id'});
@@ -34,9 +37,9 @@ async function clearAll(){
 }
 window.NotabowlSync={enqueue,clearAll};
 async function request(path,body){
-  if(!token||Date.now()>=expires){token='';connect.classList.remove('hidden');throw new Error('Saved on device · reconnect Google to sync.')}
+  if(!token||Date.now()>=expires){token='';connect.classList.remove('hidden');showLogin('Your Google session expired. Sign in again to continue.');throw new Error('Saved on device · reconnect Google to sync.')}
   const response=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(25000)});
-  if(!response.ok){if(response.status===401){token='';connect.classList.remove('hidden')}const error=new Error(response.status===403?'Google denied access. Check the Sheets API is enabled and Sheets access was granted.':response.status===401?'Saved on device · reconnect Google to sync.':'Sync failed ('+response.status+'). Your device copy is safe.');error.retryable=response.status===429||response.status>=500;throw error}
+  if(!response.ok){if(response.status===401){token='';connect.classList.remove('hidden');showLogin('Your Google session expired. Sign in again to continue.')}const error=new Error(response.status===403?'Google denied access. Check the Sheets API is enabled and Sheets access was granted.':response.status===401?'Saved on device · reconnect Google to sync.':'Sync failed ('+response.status+'). Your device copy is safe.');error.retryable=response.status===429||response.status>=500;throw error}
   return response.json();
 }
 async function schema(){
@@ -62,7 +65,7 @@ async function readCloud(){
 async function sync(){
   if(busy)return;
   if(!navigator.onLine){notify('Offline · changes saved on this device');return}
-  if(!token){notify('Saved on device · connect Google to sync');return}
+  if(!token){notify('Saved on device · connect Google to sync');return false}
   busy=true;syncButton.disabled=true;const run=session;
   try{
     await chain;notify('Syncing with Google Sheets…');
@@ -86,14 +89,16 @@ async function sync(){
     window.dispatchEvent(new CustomEvent('notabowl-cloud-data',{detail:[...latest(all).values()]}));
     notify(hasConflicts(all)?'Synced · concurrent edits kept in version history':all.some(e=>!e.synced)?'New changes waiting to sync':'Synced with Google Sheets · '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
     schedule(all.some(e=>!e.synced)?2500:60000);
-  }catch(error){notify(error.message||'Connection interrupted · device copy is safe');if(token&&error.retryable!==false&&retry<6)schedule(Math.min(60000,2000*2**retry++)+Math.random()*1000)}
+    return true;
+  }catch(error){notify(error.message||'Connection interrupted · device copy is safe');if(token&&error.retryable!==false&&retry<6)schedule(Math.min(60000,2000*2**retry++)+Math.random()*1000);return false}
   finally{busy=false;syncButton.disabled=false}
 }
-connect.onclick=()=>{
+function startConnect(){
   if(!navigator.onLine){notify('Connect to the internet to authorize Google.');return}
   if(!window.google?.accounts?.oauth2){notify('Google sign-in is still loading. Retry in a moment, or check your content blocker.');return}
-  const oauth=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'https://www.googleapis.com/auth/spreadsheets openid email',hint:OWNER,prompt:'select_account',error_callback:()=>notify('Google connection cancelled. Your device data is safe.'),callback:async response=>{
-    if(response.error){notify('Google authorization was not completed. Try connecting again.');return}
+  loginButton.disabled=true;notify('Opening Google sign-in…');
+  const oauth=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'https://www.googleapis.com/auth/spreadsheets openid email',hint:OWNER,prompt:'select_account',error_callback:()=>{loginButton.disabled=false;notify('Google connection cancelled. Your device data is safe.')},callback:async response=>{
+    if(response.error){loginButton.disabled=false;notify('Google authorization was not completed. Try connecting again.');return}
     try{
       if(!google.accounts.oauth2.hasGrantedAllScopes(response,'https://www.googleapis.com/auth/spreadsheets','openid','email'))throw new Error('Please grant Sheets and account access to enable sync.');
       const identity=await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:'Bearer '+response.access_token},signal:AbortSignal.timeout(15000)});
@@ -101,12 +106,15 @@ connect.onclick=()=>{
       const user=await identity.json();
       if(user.email!==OWNER||!user.email_verified)throw new Error('Please connect using the Google account that owns Notabowl.');
       token=response.access_token;expires=Date.now()+Number(response.expires_in)*1000-60000;session++;
-      connect.classList.add('hidden');disconnect.classList.remove('hidden');syncButton.classList.remove('hidden');await sync();
+      connect.classList.add('hidden');disconnect.classList.remove('hidden');syncButton.classList.remove('hidden');
+      if(await sync())showApp();
     }catch(error){notify(error.message)}
+    finally{loginButton.disabled=false}
   }});
   oauth.requestAccessToken();
-};
-disconnect.onclick=()=>{session++;token='';expires=0;clearTimeout(timer);connect.classList.remove('hidden');disconnect.classList.add('hidden');syncButton.classList.add('hidden');notify('Disconnected · data remains saved on this device')};
+}
+connect.onclick=startConnect;loginButton.onclick=startConnect;
+disconnect.onclick=()=>{session++;token='';expires=0;clearTimeout(timer);connect.classList.remove('hidden');disconnect.classList.add('hidden');syncButton.classList.add('hidden');showLogin('Signed out · data remains saved on this device and in Google Sheets')};
 syncButton.onclick=()=>{retry=0;sync()};
 window.addEventListener('online',()=>sync());
 window.addEventListener('offline',()=>notify('Offline · changes saved on this device'));

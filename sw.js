@@ -1,5 +1,5 @@
-const CACHE='notabowl-v2';
-const ASSETS=['./','./index.html','./sync-core.mjs','./sheets-sync.mjs?v=2'];
+const CACHE='notabowl-v3';
+const ASSETS=['./','./index.html','./sync-core.mjs','./sheets-sync.mjs?v=3'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('notabowl-')&&key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()])));
 self.addEventListener('fetch',event=>{

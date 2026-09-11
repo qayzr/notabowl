@@ -28,6 +28,7 @@
 .preShotTip{border:1px solid #1d4ed8;background:#0d1b35;border-radius:14px;padding:9px 11px;display:grid;gap:5px}.preShotTip .tipLabel{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#93c5fd;font-weight:900}.preShotTip .tipMain{font-size:14px;font-weight:850;line-height:1.25;color:#dbeafe}.preShotTip .tipMeta{font-size:10.5px;color:#94a3b8;line-height:1.3}.preShotTip .tipLine{display:flex;gap:5px;flex-wrap:wrap}.preShotTip .tipChip{border:1px solid #27466f;background:#101d33;border-radius:999px;padding:3px 7px;font-size:10px;color:#dbeafe;font-weight:750}.preShotTip .tipAdjust{border-top:1px solid #27466f;padding-top:5px;font-size:10.5px;line-height:1.3;color:#bfdbfe}.preShotTip .tipAdjust strong{color:#dbeafe}
 
 .profileBtn{border:1px solid var(--line);background:#0c1424;border-radius:999px;padding:3px;min-width:46px;min-height:46px;display:grid;place-items:center}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#334155;color:#f8fafc;font-weight:900}.avatar.big{width:48px;height:48px}.profileMenu{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(420px,100%);z-index:70;background:#111827;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom));display:grid;gap:10px}.profileHead{display:flex;gap:10px;align-items:center;margin-bottom:4px}.mindTip{text-align:center;font-weight:800;color:#dbeafe;min-height:20px;opacity:1;transition:opacity .45s ease;font-size:13px}.mindTip.fade{opacity:.15}
+.loginScreen{min-height:100dvh;width:min(440px,100%);margin:auto;padding:24px 18px;display:grid;place-items:center}.loginCard{width:100%;background:rgba(17,24,39,.97);border:1px solid var(--line);border-radius:22px;padding:26px 20px;display:grid;gap:18px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.3)}.loginMark{width:68px;height:68px;margin:auto;border-radius:22px;background:var(--accent);color:#07130a;display:grid;place-items:center;font-size:34px;font-weight:950}.loginTitle{font-size:30px;font-weight:900}.loginCopy{color:var(--muted);font-size:14px;line-height:1.5}.loginStatus{min-height:18px}
 
 /* Full frame trajectory review */
 .frameReviewSheet{position:fixed;inset:8px;z-index:61;background:#0b1020;border:1px solid var(--line);border-radius:20px;padding:10px;display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -56,7 +57,15 @@
 </style>
 </head>
 <body>
-<div class="app" id="app">
+<div class="loginScreen" id="loginScreen">
+  <div class="loginCard">
+    <div class="loginMark">B</div>
+    <div><div class="loginTitle">Bowling Notes</div><div class="loginCopy" style="margin-top:8px">Sign in to restore your profile, ball bag and bowling history from Google Sheets.</div></div>
+    <button class="btn primary" id="loginGoogleBtn" type="button">Continue with Google</button>
+    <div class="mini muted loginStatus" id="loginStatus" role="status" aria-live="polite">Your bowling data stays in your Google Sheet.</div>
+  </div>
+</div>
+<div class="app hidden" id="app">
   <div class="top">
     <div><div class="brand">Bowling Notes</div><div class="sub">Score, pin leaves + quick shot flags.</div></div>
     <button class="profileBtn" id="profileBtn" type="button" aria-label="Open profile menu"><div class="avatar">K</div></button>
@@ -695,7 +704,7 @@ window.addEventListener('pagehide',()=>{if(!$('game').classList.contains('hidden
 })();
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script type="module" src="./sheets-sync.mjs?v=2"></script>
+<script type="module" src="./sheets-sync.mjs?v=3"></script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
 </body>
 </html>

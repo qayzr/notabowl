@@ -39,6 +39,9 @@ test('formula-like user text stays literal in the row model',()=>{
 
 // Run the real inline app against a minimal DOM to exercise save/recovery hooks.
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+test('app opens on Google sign-in before revealing bowling data',()=>{
+  assert.match(html,/id="loginScreen"/);assert.match(html,/id="loginGoogleBtn"/);assert.match(html,/class="app hidden" id="app"/);
+});
 function boot(storage=new Map()){
   const elements=new Map();
   const element=id=>{
