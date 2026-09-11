@@ -12,13 +12,27 @@ const ready=new Promise((resolve,reject)=>{
 });
 async function records(){await ready;return new Promise((resolve,reject)=>{const r=db.transaction('events').objectStore('events').getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 async function put(events){await ready;if(!events.length)return;return new Promise((resolve,reject)=>{const tx=db.transaction('events','readwrite');for(const e of events)tx.objectStore('events').put(e);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
+async function clearRecords(){await ready;return new Promise((resolve,reject)=>{const tx=db.transaction('events','readwrite');tx.objectStore('events').clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
 function schedule(ms=2500){clearTimeout(timer);timer=setTimeout(()=>sync(),ms)}
 function enqueue(type,entityId,data){
   const snapshot=JSON.parse(JSON.stringify(data));
   chain=chain.then(async()=>{const all=await records(),e=makeEvent(all,type,entityId,snapshot);if(e)await put([e]);if(e){notify(token?'Saved on device · waiting to sync':'Saved on device · connect Google to back up');schedule()}}).catch(error=>notify(error.message));
   return chain;
 }
-window.NotabowlSync={enqueue};
+async function clearAll(){
+  if(busy)throw new Error('A sync is already running. Wait a moment, then try again.');
+  if(!navigator.onLine)throw new Error('Connect to the internet before clearing synced data.');
+  if(!token)throw new Error('Connect Google Sheets before clearing all data.');
+  busy=true;syncButton.disabled=true;clearTimeout(timer);session++;
+  try{
+    await chain;notify('Clearing data from Google Sheets…');
+    await schema();
+    await request('/values:batchClear',{ranges:[...TABLES,...Object.keys(PROJECTIONS)].map(name=>"'"+name+"'!A2:Z")});
+    await clearRecords();retry=0;notify('All profile and game data cleared');
+  }catch(error){notify(error.message||'Could not clear all data. Your device copy was kept.');throw error}
+  finally{busy=false;syncButton.disabled=false}
+}
+window.NotabowlSync={enqueue,clearAll};
 async function request(path,body){
   if(!token||Date.now()>=expires){token='';connect.classList.remove('hidden');throw new Error('Saved on device · reconnect Google to sync.')}
   const response=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(25000)});

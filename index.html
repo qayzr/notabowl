@@ -67,6 +67,7 @@
     <div class="profileHead"><div class="avatar big" id="menuAvatar">K</div><div><strong id="menuProfileName">Bowling profile</strong><div class="menuProfileLine" id="menuProfileSummary">Set up your bowling profile</div></div></div>
     <button class="btn ghost" id="editProfileBtn">Edit profile & ball bag</button>
     <button class="btn ghost" id="historyBtn">History</button>
+    <button class="btn danger" id="clearAllDataBtn">Clear all data</button>
     <button class="btn danger" id="endBtn">End game</button>
     <button class="btn ghost" id="closeProfileBtn">Close</button>
   </div>
@@ -652,6 +653,19 @@ startMentalTips();
 function openProfile(){renderProfileSummary();$('profileMenuBackdrop').classList.remove('hidden');$('profileMenu').classList.remove('hidden')}
 function closeProfile(){$('profileMenuBackdrop').classList.add('hidden');$('profileMenu').classList.add('hidden')}
 $('profileBtn').onclick=openProfile;$('profileMenuBackdrop').onclick=closeProfile;$('closeProfileBtn').onclick=closeProfile;$('editProfileBtn').onclick=openProfileEditor;$('homeProfileSummary').onclick=openProfileEditor;$('cancelProfileBtn').onclick=closeProfileEditor;
+$('clearAllDataBtn').onclick=async event=>{
+  event.stopPropagation();
+  if(!confirm('Permanently delete your profile, ball bag, games and throw history from this device and Google Sheets? This cannot be undone.'))return;
+  const button=$('clearAllDataBtn');button.disabled=true;
+  try{
+    if(!window.NotabowlSync?.clearAll)throw new Error('Google sync is still loading. Try again in a moment.');
+    await window.NotabowlSync.clearAll();
+    localStorage.removeItem(PROFILE_STORAGE);localStorage.removeItem(STORAGE);localStorage.removeItem('notabowlActiveV1');
+    profile=defaultProfile();profileDraft=null;S=fresh();resumeCandidate=null;
+    closeProfile();closeProfileEditor();closeFeedback();closePathSheet();show('home');renderProfileSummary();updateResume();
+  }catch(error){$('cloudStatus').textContent=error.message||'Could not clear all data. Nothing was deleted from this device.'}
+  finally{button.disabled=false}
+};
 $('addBallBtn').onclick=()=>editBall(-1);
 $('saveProfileBtn').onclick=()=>{profileDraft.name=$('profileName').value.trim();profileDraft.level=$('profileLevel').value;profileDraft.units=$('profileUnits').value;profile=profileDraft;saveProfileData();closeProfileEditor();renderProfileSummary()};
 renderProfileSummary();if(!profile.name&&!profile.balls.length)setTimeout(openProfileEditor,50);

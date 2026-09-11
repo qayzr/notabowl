@@ -51,7 +51,8 @@ function boot(storage=new Map()){
   const context={document:{getElementById:element,querySelectorAll:()=>[],createElementNS:()=>element('svg'+Math.random()),addEventListener(){}},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},setTimeout(){},setInterval(){},clearInterval(){},alert(){},confirm:()=>true,CustomEvent:class{constructor(type,args){this.type=type;this.detail=args.detail}},console};
   context.window={addEventListener:(type,fn)=>listeners[type]=fn,dispatchEvent:e=>listeners[e.type]?.(e)};
   vm.createContext(context);const source=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];new vm.Script(source).runInContext(context);
-  return {element,storage,data:context.window.NotabowlData};
+  context.window.NotabowlSync={};
+  return {element,storage,data:context.window.NotabowlData,sync:context.window.NotabowlSync};
 }
 test('starting and recording a throw persist the active game before closure',()=>{
   const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)]]),app=boot(storage);
@@ -64,4 +65,16 @@ test('ending repeatedly saves only one game and clears active recovery',()=>{
   const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)]]),app=boot(storage);
   app.element('startBtn').onclick();app.element('endBtn').onclick();app.element('endBtn').onclick();
   assert.equal(JSON.parse(storage.get('bowlingNotesGamesV1')).length,1);assert.equal(storage.has('notabowlActiveV1'),false);
+});
+test('clear all waits for cloud deletion before resetting local data',async()=>{
+  const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)],['bowlingNotesGamesV1','[]'],['notabowlActiveV1','{}']]),app=boot(storage);
+  let cloudCleared=false;app.sync.clearAll=async()=>{cloudCleared=true};
+  await app.element('clearAllDataBtn').onclick({stopPropagation(){}});
+  assert.equal(cloudCleared,true);assert.equal(storage.has('bowlingNotesProfileV1'),false);assert.equal(storage.has('bowlingNotesGamesV1'),false);assert.equal(storage.has('notabowlActiveV1'),false);
+});
+test('clear all keeps the device copy when cloud deletion fails',async()=>{
+  const storage=new Map([['bowlingNotesProfileV1',JSON.stringify(profile)],['bowlingNotesGamesV1','[]']]),app=boot(storage);
+  app.sync.clearAll=async()=>{throw new Error('Cloud unavailable')};
+  await app.element('clearAllDataBtn').onclick({stopPropagation(){}});
+  assert.equal(storage.has('bowlingNotesProfileV1'),true);assert.equal(storage.has('bowlingNotesGamesV1'),true);
 });
